@@ -1,3 +1,5 @@
+from os import system
+
 # from google.co import auth
 from dotenv import load_dotenv
 from google.cloud import speech
@@ -40,3 +42,7 @@ def run_quickstart(audio_stream: bytes) -> speech.RecognizeResponse:
     )
     response = speechClient.recognize(config=config, audio=audio)
     return response
+
+
+if __name__ == "__main__":
+    system("python3 -m flask --app main run")
