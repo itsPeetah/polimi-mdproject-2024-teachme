@@ -1,5 +1,6 @@
 **/.env
 **/.DS_Store
+**/conversation_history.db
 
 # Python gitignore follows
 # Byte-compiled / optimized / DLL files
