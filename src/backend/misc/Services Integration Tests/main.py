@@ -9,6 +9,7 @@ from flask import Flask, request, jsonify, Response
 from elevenlabs.client import ElevenLabs
 
 from LLM import ConversationalChatBot
+from database import MongoDBConnector
 
 load_dotenv()
 
@@ -62,9 +63,10 @@ def run_quickstart(audio_stream: bytes) -> speech.RecognizeResponse:
         conversation_id=1,
         conversation_user_level="intermediate",
         conversation_difficulty="medium",
-        conversation_topic="Discussing the weather"
+        conversation_topic="Discussing the weather",
+        db_connector=MongoDBConnector(getenv("MONGODB_URI")),
     )
-    chatbot.load_chat_history()
+
     response = chatbot.send_message(transcript).content
     result = {
           "human" : transcript,

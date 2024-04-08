@@ -7,3 +7,4 @@ langchain_openai
 protobuf
 python-dotenv
 google-cloud-speech
+pymongo
