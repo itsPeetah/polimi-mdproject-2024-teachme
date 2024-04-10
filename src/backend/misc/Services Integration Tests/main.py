@@ -6,6 +6,7 @@ path.append("../../")
 from dotenv import load_dotenv
 from google.cloud import speech
 from flask import Flask, request, jsonify, Response
+from flask_cors import CORS
 from elevenlabs.client import ElevenLabs
 
 from LLM import ConversationalChatBot
@@ -14,6 +15,7 @@ from database import MongoDBConnector
 load_dotenv()
 
 app = Flask(__name__)
+CORS(app, origins='*')
 speechClient = speech.SpeechClient()
 EL_client = ElevenLabs(api_key=getenv("ELEVENLABS_API_KEY"))
 
@@ -28,7 +30,7 @@ def hello_world():
             audio_data = audio_file.stream.read()
             recognized = run_quickstart(audio_data)
             response = jsonify(recognized)
-            response.headers.add("Access-Control-Allow-Origin", "*")
+            # response.headers.add("Access-Control-Allow-Origin", "*")
             return response
         else:
             return "No file uploaded!"
@@ -43,7 +45,7 @@ def text_to_speech():
     text = request.args.get("text")
     audio_tts = EL_client.generate(text=text)
     response = Response(audio_tts, mimetype="audio/wav")
-    response.headers.add("Access-Control-Allow-Origin", "*")
+    # response.headers.add("Access-Control-Allow-Origin", "*")
     return response
     
 def run_quickstart(audio_stream: bytes) -> speech.RecognizeResponse:
