@@ -12,7 +12,7 @@
             event.preventDefault();
             const formData = new FormData();
             formData.append('audio_file', document.querySelector('input[type="file"]').files[0]);
-            const response = await fetch('http://teachme.zapto.org:5000/', {
+            const response = await fetch('/', {
                 method: 'POST',
                 body: formData
             });
@@ -30,7 +30,7 @@
             const audio = document.createElement('audio');
             const text = encodeURIComponent(data.chatbot);
 
-            audio.src = 'http://teachme.zapto.org:5000/text-to-speech?text=' + text;
+            audio.src = '/text-to-speech?text=' + text;
             audio.controls = true;
             audio.autoplay = true;
             audio.loop = false;
