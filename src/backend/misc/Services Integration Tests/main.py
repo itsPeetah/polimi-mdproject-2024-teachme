@@ -78,4 +78,4 @@ def run_quickstart(audio_stream: bytes) -> speech.RecognizeResponse:
 
 
 if __name__ == "__main__":
-    system("python3 -m flask --app main run")
+    system("python3 -m flask --app main run --host=0.0.0.0 --port=5000")
