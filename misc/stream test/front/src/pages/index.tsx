@@ -13,6 +13,10 @@ export default function Home() {
       key: "speaking_status",
       handler: (d) => console.log(d),
     },
+    {
+      key: "generic_data",
+      handler: (d) => console.log("Received generic data", d),
+    },
   ]);
 
   function sendAudioData(data: string) {
