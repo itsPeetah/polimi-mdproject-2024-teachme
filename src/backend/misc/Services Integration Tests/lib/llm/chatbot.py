@@ -1,5 +1,6 @@
 """Chatbots for TeachMe project.
 """
+
 import warnings
 from sys import path
 
@@ -12,7 +13,7 @@ from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_mongodb.chat_message_histories import MongoDBChatMessageHistory
 
 from .PROMPTS import get_prompt
-from database import Connector, MongoDBConnector
+from ..database import Connector, MongoDBConnector
 
 
 class BaseChatBot:
@@ -23,11 +24,14 @@ class BaseChatBot:
     :ivar float temperature: Sampling temperature parameter for generating responses.
     :ivar BaseChatModel _chat_base: Instance of the chat model used by the bot.
     """
-    def __init__(self,
-                 api_key: str,
-                 model: BaseChatModel = ChatOpenAI,
-                 model_version: str = "gpt-3.5-turbo",
-                 temperature: float = 0.2):
+
+    def __init__(
+        self,
+        api_key: str,
+        model: BaseChatModel = ChatOpenAI,
+        model_version: str = "gpt-3.5-turbo",
+        temperature: float = 0.2,
+    ):
         self.api_key = api_key
         self.temperature = temperature
 
@@ -36,6 +40,7 @@ class BaseChatBot:
             api_key=self.api_key,
             temperature=temperature,
         )
+
 
 class ConversationalChatBot(BaseChatBot):
     def __init__(
@@ -49,13 +54,13 @@ class ConversationalChatBot(BaseChatBot):
         model_version: str = "gpt-3.5-turbo",
         temperature: float = 0.2,
         db_connector: Connector = None,
-        db_name: str = "teachme_main"
-        ):
+        db_name: str = "teachme_main",
+    ):
         super().__init__(api_key, model, model_version, temperature)
 
         self._db_connector = db_connector
         self._db_name = db_name
-        
+
         # Check if the data already exists in the database collection
         # named 'conversations'
         if self._db_connector is not None:
@@ -70,16 +75,16 @@ class ConversationalChatBot(BaseChatBot):
                     "topic": conversation_topic,
                 }
                 conversations.insert_one(**conversation)
-                
+
             conversation_user_level = conversation["user_level"]
             conversation_difficulty = conversation["difficulty"]
             conversation_topic = conversation["topic"]
-            
+
         self._conversation_id = conversation_id
         self._conversation_user_level = conversation_user_level
         self._conversation_difficulty = conversation_difficulty
         self._conversation_topic = conversation_topic
-        
+
         # Checking if the parameters have been set,
         # otherwise, if the conversation is not found in the database, raise an error
         # while if the others are not found, set them to default values.
@@ -91,10 +96,10 @@ class ConversationalChatBot(BaseChatBot):
             self._conversation_difficulty = "medium"
         if self._conversation_topic is None:
             self._conversation_topic = "No specific topic has been set, so the conversation is open to any topic."
-        
+
         self._chat = None
         self._config = None
-        
+
         self.load_chat_history()
 
     def load_chat_history(self):
@@ -108,7 +113,10 @@ class ConversationalChatBot(BaseChatBot):
         """
         prompt = ChatPromptTemplate.from_messages(
             [
-                ("system", f"{get_prompt(prompt_name='CONVERSATIONAL_SYSTEM_PROMPT', user_level=self._conversation_user_level, conversation_difficulty=self._conversation_difficulty, conversation_topic=self._conversation_topic)}"),
+                (
+                    "system",
+                    f"{get_prompt(prompt_name='CONVERSATIONAL_SYSTEM_PROMPT', user_level=self._conversation_user_level, conversation_difficulty=self._conversation_difficulty, conversation_topic=self._conversation_topic)}",
+                ),
                 MessagesPlaceholder(variable_name="history"),
                 ("human", "{answer}"),
             ]
@@ -128,36 +136,39 @@ class ConversationalChatBot(BaseChatBot):
             history_messages_key="history",
         )
         self._config = {"configurable": {"session_id": f"{self._conversation_id}"}}
-    
+
     def _get_message_history(self, session_id: int) -> str:
         if self._db_connector is None:
             warnings.warn("No database connection provided. Returning empty string.")
             return ""
 
-        return MongoDBChatMessageHistory(
+        return (
+            MongoDBChatMessageHistory(
                 connection_string=self._db_connector.connection_string,
                 session_id=session_id,
                 database_name=self._db_name,
                 collection_name="chat_message_history",
-        ),
-            
+            ),
+        )
+
     def send_message(self, message: str) -> str:
         response = self._chat.invoke(
             {"answer": message},
             config=self._config,
         )
-        
+
         return response
-        
+
     @property
     def conversation_id(self) -> int:
         return self._conversation_id
+
 
 if __name__ == "__main__":
     from dotenv import load_dotenv
     import os
     from database import MongoDBConnector
-    
+
     load_dotenv()
 
     chatbot = ConversationalChatBot(
@@ -168,6 +179,8 @@ if __name__ == "__main__":
         conversation_topic=None,
         db_connector=MongoDBConnector(os.getenv("MONGODB_URI")),
     )
-    
-    bot_answer = chatbot.send_message("Have we ever talked about the weather so far in our conversation?")
+
+    bot_answer = chatbot.send_message(
+        "Have we ever talked about the weather so far in our conversation?"
+    )
     print(bot_answer)

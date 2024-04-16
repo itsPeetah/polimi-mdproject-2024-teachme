@@ -1,9 +1,10 @@
 import time
 
 from os import system, getenv
-from sys import path
 
-path.append("../../")
+from lib.llm import ConversationalChatBot
+from lib.database import MongoDBConnector
+from lib.audio import BufferHanlder
 
 from dotenv import load_dotenv
 from google.cloud import speech
@@ -11,10 +12,6 @@ from flask import Flask, request, jsonify, Response
 from flask_socketio import SocketIO, send, emit
 from flask_cors import CORS
 from elevenlabs.client import ElevenLabs
-
-from LLM import ConversationalChatBot
-from database import MongoDBConnector
-from audio import BufferHanlder
 
 load_dotenv()
 
