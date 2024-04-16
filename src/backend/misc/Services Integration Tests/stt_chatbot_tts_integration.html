@@ -1,0 +1,43 @@
+<html>
+    <body>
+        <form enctype="multipart/form-data" onsubmit="handle_submit(event)">
+            <input type="file" name="audio_file" accept="audio/*">  <button type="submit">Upload Audio</button>
+      </form>
+
+      <div id="container"></div>
+
+      <script>
+        async function handle_submit(event) {
+            console.log('submitted');
+            event.preventDefault();
+            const formData = new FormData();
+            formData.append('audio_file', document.querySelector('input[type="file"]').files[0]);
+            const response = await fetch('/', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+
+            <!-- Add a p child to container -->
+            const p = document.createElement('p');
+            p.textContent = data.human;
+            document.querySelector('#container').appendChild(p);
+
+            const p1 = document.createElement('p');
+            p1.textContent = data.chatbot;
+            document.querySelector('#container').appendChild(p1);
+
+            const audio = document.createElement('audio');
+            const text = encodeURIComponent(data.chatbot);
+
+            audio.src = '/text-to-speech?text=' + text;
+            audio.controls = true;
+            audio.autoplay = true;
+            audio.loop = false;
+            document.querySelector('#container').appendChild(audio);
+            
+            console.log(data);
+        }
+      </script>
+    </body>
+</html>
