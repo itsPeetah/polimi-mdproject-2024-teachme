@@ -1,3 +1,5 @@
+import time
+
 from os import system, getenv
 from sys import path
 
@@ -6,18 +8,25 @@ path.append("../../")
 from dotenv import load_dotenv
 from google.cloud import speech
 from flask import Flask, request, jsonify, Response
+from flask_socketio import SocketIO, send, emit
 from flask_cors import CORS
 from elevenlabs.client import ElevenLabs
 
 from LLM import ConversationalChatBot
 from database import MongoDBConnector
+from audio import BufferHanlder
 
 load_dotenv()
 
 app = Flask(__name__)
+flask_ws = SocketIO(app, cors_allowed_origins="*")
 CORS(app, origins='*')
 speechClient = speech.SpeechClient()
 EL_client = ElevenLabs(api_key=getenv("ELEVENLABS_API_KEY"))
+
+audio_buffer_handlers = {}
+
+# ROUTES
 
 @app.route("/", methods=["GET", "POST"])
 def hello_world():
@@ -47,36 +56,106 @@ def text_to_speech():
     response = Response(audio_tts, mimetype="audio/wav")
     # response.headers.add("Access-Control-Allow-Origin", "*")
     return response
+
+@app.route("/hello", methods=["GET"])
+def route_hello():
+    return Response(status=200, response="hello, world".encode("utf-8"))
+
+
+@app.route("/now", methods=["GET"])
+def route_now():
+    t_as_int = int(time())
+    return str(t_as_int)
+
+
+@app.route("/flush", methods=["GET"])
+def flush():
+    for k, v in audio_buffer_handlers.items():
+        v.save_audio_to_wav()
+        v.buffer.clear()
+    return "Ok"
+
+# WEBSOCKET
+
+@flask_ws.on("connect")
+def on_connected():
+    sid = request.sid
+    print("ws user connected", f"sid: {sid}")
+    audio_buffer_handlers[sid] = BufferHanlder(sid, 500)
+
+
+@flask_ws.on("disconnected connect")
+def on_connected():
+    sid = request.sid
+    print("ws user disconnected", f"sid: {sid}")
+
+
+@flask_ws.on("message")
+def on_message(message):
+    print("Received message:", message)
+
+
+@flask_ws.on("foo")
+def on_foo_event(data):
+    print("FOO", data)
+
+
+@flask_ws.on("audio_data")
+def on_audio_data(data: bytes):
+    sid = request.sid
+    handler: BufferHanlder = audio_buffer_handlers[sid]
+    audio_data = data["data"]
+    is_speaking, was_speaking, max_sample, audio_bytes = handler.handle_audio_data(audio_data)
+    if not is_speaking and was_speaking:
+        print("STOPPED SPEAKING")
+        emit(
+            "speaking_status",
+            f"You stopped speaking (max_sample: {max_sample})",
+            to=sid,
+        )
+        run_quickstart(audio_bytes)
+    if is_speaking and not was_speaking:
+        print("STARTED SPEAKING")
+        emit(
+            "speaking_status",
+            f"You started speaking (max_sample: {max_sample})",
+            to=sid,
+        )
+
     
 def run_quickstart(audio_stream: bytes) -> speech.RecognizeResponse:
     audio = speech.RecognitionAudio(content=audio_stream)
     config = speech.RecognitionConfig(
         encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,
-        audio_channel_count=2,  # 1 channel for raw, 2 channels for wav
-        sample_rate_hertz=44100,  # 16000 for raw, 44100 for wav
+        audio_channel_count=1,  # 1 channel for raw, 2 channels for wav
+        sample_rate_hertz=16000,  # 16000 for raw, 44100 for wav
         language_code="en-US",
     )
     response = speechClient.recognize(config=config, audio=audio)
     
-    transcript = response.results[0].alternatives[0].transcript
-    
-    chatbot = ConversationalChatBot(
-        api_key=getenv("OPENAI_API_KEY"),
-        conversation_id=1,
-        conversation_user_level="intermediate",
-        conversation_difficulty="medium",
-        conversation_topic="Discussing the weather",
-        db_connector=MongoDBConnector(getenv("MONGODB_URI")),
-    )
+    transcript: str = response.results[0].alternatives[0].transcript
+    print("Transcript:", transcript)
+    if transcript:
+        chatbot = ConversationalChatBot(
+            api_key=getenv("OPENAI_API_KEY"),
+            conversation_id=1,
+            conversation_user_level="intermediate",
+            conversation_difficulty="medium",
+            conversation_topic="Discussing the weather",
+            db_connector=MongoDBConnector(getenv("MONGODB_URI")),
+        )
 
-    response = chatbot.send_message(transcript).content
-    result = {
-          "human" : transcript,
-          "chatbot" : response
-    }
-    print(result)
+        response = chatbot.send_message(transcript).content
+        result = {
+            "human" : transcript,
+            "chatbot" : response
+        }
+        print(result)
 
-    return result
+        return result
+    else:
+        print("No transcript found")
+        return "No transcript found"
 
 
 if __name__ == "__main__":
