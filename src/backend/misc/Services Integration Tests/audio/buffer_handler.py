@@ -1,5 +1,6 @@
 import wave
 import numpy as np
+import os
 
 
 class BufferHanlder:
@@ -31,9 +32,14 @@ class BufferHanlder:
 
         audio_data_combined = np.concatenate(self.buffer)
 
-        audio_data_combined_bytes = audio_data_combined.tobytes() # pipe these directly (clear buffer first to allow new data)
+        audio_data_combined_bytes = (
+            audio_data_combined.tobytes()
+        )  # pipe these directly (clear buffer first to allow new data)
 
+        if not os.path.isdir("./saved"):
+            os.mkdir("./saved")
         file_name = f"./saved/{self.id}_{self.counter}.wav"
+
         with wave.open(file_name, "wb") as wf:
             wf.setnchannels(1)  # Mono
             wf.setsampwidth(2)  # 16-bit
@@ -41,7 +47,7 @@ class BufferHanlder:
             wf.writeframes(audio_data_combined.tobytes())
         self.counter += 1
         self.buffer.clear()
-        
+
         return audio_data_combined_bytes
 
     @staticmethod

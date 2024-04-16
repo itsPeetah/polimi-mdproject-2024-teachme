@@ -20,13 +20,14 @@ load_dotenv()
 
 app = Flask(__name__)
 flask_ws = SocketIO(app, cors_allowed_origins="*")
-CORS(app, origins='*')
+CORS(app, origins="*")
 speechClient = speech.SpeechClient()
 EL_client = ElevenLabs(api_key=getenv("ELEVENLABS_API_KEY"))
 
 audio_buffer_handlers = {}
 
 # ROUTES
+
 
 @app.route("/", methods=["GET", "POST"])
 def hello_world():
@@ -46,8 +47,9 @@ def hello_world():
 
     with open("stt_chatbot_tts_integration.html", "r", encoding="utf-8") as f:
         html_content = f.read()
-        
+
     return html_content
+
 
 @app.route("/text-to-speech", methods=["GET"])
 def text_to_speech():
@@ -56,6 +58,7 @@ def text_to_speech():
     response = Response(audio_tts, mimetype="audio/wav")
     # response.headers.add("Access-Control-Allow-Origin", "*")
     return response
+
 
 @app.route("/hello", methods=["GET"])
 def route_hello():
@@ -75,7 +78,9 @@ def flush():
         v.buffer.clear()
     return "Ok"
 
+
 # WEBSOCKET
+
 
 @flask_ws.on("connect")
 def on_connected():
@@ -105,7 +110,9 @@ def on_audio_data(data: bytes):
     sid = request.sid
     handler: BufferHanlder = audio_buffer_handlers[sid]
     audio_data = data["data"]
-    is_speaking, was_speaking, max_sample, audio_bytes = handler.handle_audio_data(audio_data)
+    is_speaking, was_speaking, max_sample, audio_bytes = handler.handle_audio_data(
+        audio_data
+    )
     if not is_speaking and was_speaking:
         print("STOPPED SPEAKING")
         emit(
@@ -113,7 +120,7 @@ def on_audio_data(data: bytes):
             f"You stopped speaking (max_sample: {max_sample})",
             to=sid,
         )
-        run_quickstart(audio_bytes)
+        response = run_quickstart(audio_bytes)
     if is_speaking and not was_speaking:
         print("STARTED SPEAKING")
         emit(
@@ -122,41 +129,44 @@ def on_audio_data(data: bytes):
             to=sid,
         )
 
-    
-def run_quickstart(audio_stream: bytes) -> speech.RecognizeResponse:
+
+def get_user_transcript(audio_stream: bytes) -> speech.RecognizeResponse:
     audio = speech.RecognitionAudio(content=audio_stream)
     config = speech.RecognitionConfig(
         encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,
-        audio_channel_count=1,  # 1 channel for raw, 2 channels for wav
-        sample_rate_hertz=16000,  # 16000 for raw, 44100 for wav
+        audio_channel_count=2,  # 1 channel for raw, 2 channels for wav
+        sample_rate_hertz=44100,  # 16000 for raw, 44100 for wav
         language_code="en-US",
     )
     response = speechClient.recognize(config=config, audio=audio)
-    
-    transcript: str = response.results[0].alternatives[0].transcript
-    print("Transcript:", transcript)
-    if transcript:
-        chatbot = ConversationalChatBot(
-            api_key=getenv("OPENAI_API_KEY"),
-            conversation_id=1,
-            conversation_user_level="intermediate",
-            conversation_difficulty="medium",
-            conversation_topic="Discussing the weather",
-            db_connector=MongoDBConnector(getenv("MONGODB_URI")),
-        )
-
-        response = chatbot.send_message(transcript).content
-        result = {
-            "human" : transcript,
-            "chatbot" : response
-        }
-        print(result)
-
-        return result
+    if len(response.results) >= 1:
+        transcript: str = response.results[0].alternatives[0].transcript
+        return transcript
     else:
-        print("No transcript found")
-        return "No transcript found"
+        return "Audio transcription failed"
+
+
+def get_chatbot_answer(prompt: str) -> str:
+    chatbot = ConversationalChatBot(
+        api_key=getenv("OPENAI_API_KEY"),
+        conversation_id=1,
+        conversation_user_level="intermediate",
+        conversation_difficulty="medium",
+        conversation_topic="Discussing the weather",
+        db_connector=MongoDBConnector(getenv("MONGODB_URI")),
+    )
+    response = chatbot.send_message(prompt).content
+    return response
+
+
+def run_quickstart(audio_stream: bytes) -> speech.RecognizeResponse:
+    transcript = get_user_transcript(audio_stream)
+    print("User transcript:", transcript)
+    emit("transcript", {"user": transcript})
+    response = get_chatbot_answer(transcript)
+    print("Chatbot answer:", response)
+    emit("transcript", {"chatbot": response})
 
 
 if __name__ == "__main__":
-    system("python3 -m flask --app main run --host=0.0.0.0 --port=5000")
+    system("python3 -m flask --app main run --host=0.0.0.0 --port=5000 --debug")
