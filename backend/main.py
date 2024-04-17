@@ -1,5 +1,6 @@
 import time
 import struct
+import io
 
 from os import system, getenv
 
@@ -163,7 +164,7 @@ def get_chatbot_answer(prompt: str) -> str:
 def load_audio(audio_file):
     # Getting the audio file parameters
     # Read the header to get audio file information
-    
+    audio_file = io.BytesIO(audio_file)
     header = audio_file.read(44) # In WAV files, first 44 bytes are reserved for the header
     print(f"The header is {header}")
     
