@@ -132,6 +132,7 @@ def on_audio_data(data: bytes):
 
 def get_user_transcript(audio_stream: bytes) -> speech.RecognizeResponse:
     audio_headers = load_audio(audio_stream)
+    print(audio_headers)
     audio = speech.RecognitionAudio(content=audio_stream)
     config = speech.RecognitionConfig(
         encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,
