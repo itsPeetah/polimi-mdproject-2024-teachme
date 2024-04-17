@@ -69,6 +69,7 @@ class ConversationalChatBot(BaseChatBot):
             conversation = conversations.find_by_id(conversation_id)
             if conversation is None:
                 conversation = Conversation(
+                    _id = None,
                     conversation_id=conversation_id, 
                     user_level=conversation_user_level, 
                     difficulty=conversation_difficulty, 

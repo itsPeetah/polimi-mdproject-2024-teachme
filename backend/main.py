@@ -131,7 +131,7 @@ def get_user_transcript(audio_stream: bytes) -> speech.RecognizeResponse:
     audio = speech.RecognitionAudio(content=audio_stream)
     config = speech.RecognitionConfig(
         encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,
-        audio_channel_count=2,  # 1 channel for raw, 2 channels for wav
+        # audio_channel_count=2,  # 1 channel for raw, 2 channels for wav
         # sample_rate_hertz=44100,  # 16000 for raw, 44100 for wav
         language_code="en-US",
     )
