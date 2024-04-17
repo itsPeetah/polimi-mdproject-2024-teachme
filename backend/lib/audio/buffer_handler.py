@@ -36,15 +36,15 @@ class BufferHanlder:
             audio_data_combined.tobytes()
         )  # pipe these directly (clear buffer first to allow new data)
 
-        if not os.path.isdir("./saved"):
-            os.mkdir("./saved")
-        file_name = f"./saved/{self.id}_{self.counter}.wav"
+        # if not os.path.isdir("./saved"):
+            # os.mkdir("./saved")
+        # file_name = f"./saved/{self.id}_{self.counter}.wav"
 
-        with wave.open(file_name, "wb") as wf:
-            wf.setnchannels(1)  # Mono
-            wf.setsampwidth(2)  # 16-bit
-            wf.setframerate(16000)  # Sample rate
-            wf.writeframes(audio_data_combined.tobytes())
+        # with wave.open(file_name, "wb") as wf:
+            # wf.setnchannels(1)  # Mono
+            # wf.setsampwidth(2)  # 16-bit
+            # wf.setframerate(16000)  # Sample rate
+            # wf.writeframes(audio_data_combined.tobytes())
         self.counter += 1
         self.buffer.clear()
 

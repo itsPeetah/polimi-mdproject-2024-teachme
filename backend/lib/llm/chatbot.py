@@ -2,18 +2,16 @@
 """
 
 import warnings
-from sys import path
-
-path.append("../")
 
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_mongodb.chat_message_histories import MongoDBChatMessageHistory
+# from langchain.chains import OpenAIModerationChain
 
 from .PROMPTS import get_prompt
-from ..database import Connector, MongoDBConnector
+from ..database import Connector, MongoDBConnector, Conversation
 
 
 class BaseChatBot:
@@ -40,6 +38,8 @@ class BaseChatBot:
             api_key=self.api_key,
             temperature=temperature,
         )
+        
+        # self.content_mod_chain = OpenAIModerationChain()
 
 
 class ConversationalChatBot(BaseChatBot):
@@ -68,17 +68,18 @@ class ConversationalChatBot(BaseChatBot):
             conversations = db.get_collection("conversations")
             conversation = conversations.find_by_id(conversation_id)
             if conversation is None:
-                conversation = {
-                    "conversation_id": conversation_id,
-                    "user_level": conversation_user_level,
-                    "difficulty": conversation_difficulty,
-                    "topic": conversation_topic,
-                }
-                conversations.insert_one(**conversation)
+                conversation = Conversation(
+                    _id = None,
+                    conversation_id=conversation_id, 
+                    user_level=conversation_user_level, 
+                    difficulty=conversation_difficulty, 
+                    topic=conversation_topic
+                )
+                conversations.insert_one(conversation_id = conversation.conversation_id, user_level = conversation.user_level, difficulty = conversation.difficulty, topic = conversation.topic)
 
-            conversation_user_level = conversation["user_level"]
-            conversation_difficulty = conversation["difficulty"]
-            conversation_topic = conversation["topic"]
+            conversation_user_level = conversation.user_level
+            conversation_difficulty = conversation.difficulty
+            conversation_topic = conversation.topic
 
         self._conversation_id = conversation_id
         self._conversation_user_level = conversation_user_level
@@ -122,7 +123,7 @@ class ConversationalChatBot(BaseChatBot):
             ]
         )
 
-        _chat_with_history = prompt | self._chat_base
+        _chat_with_history = prompt | self._chat_base # | self.content_mod_chain
 
         self._chat = RunnableWithMessageHistory(
             _chat_with_history,
