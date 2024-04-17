@@ -56,7 +56,7 @@ def on_message(message):
 
 @flask_ws.on("foo")
 def on_foo_event(data):
-    print("FOO", data)
+    print("FOO", data, request.sid)
 
 
 @flask_ws.on("audio_data")
