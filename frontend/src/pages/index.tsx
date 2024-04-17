@@ -7,7 +7,7 @@ export default function Home() {
       <Link href="/student">Student App</Link>
       <Link href="/teacher">Teacher App</Link>
       <h3 className="my-5 font-bold">test</h3>
-      <Link href="/test/dictaphone">Test Dictaphone</Link>
+      <Link href="/test/chat">Test Chat</Link>
     </main>
   );
 }
