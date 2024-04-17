@@ -17,6 +17,7 @@ class Conversation:
     """
     Represents a conversation.
     """
+    _id: any
     conversation_id: int
     user_level: str
     difficulty: str

@@ -64,7 +64,7 @@ class ConversationsCollection(Collection):
         :rtype: Conversation
         """
         conversation_to_return = self._collection.find_one({"conversation_id": conversation_id})
-        return Conversation(**conversation_to_return)
+        return Conversation(**conversation_to_return) if conversation_to_return is not None else None
 
     def insert_one(self, conversation_id: int, user_level: str = None, difficulty: str = None, topic: str = None):
         """
