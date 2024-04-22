@@ -11,4 +11,4 @@ class Logger():
         self.logs = self.db["logs"]
     
     def log(self, log: Log):
-        self.logs.insert_one({"log_type": log.log_type.value, "message": log.message, "timestamp": log.time_stamp})
+        self.logs.insert_one({"log_type": log.log_type.value, "message": log.message, "time_stamp": log.time_stamp})

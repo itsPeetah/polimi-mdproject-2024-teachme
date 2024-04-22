@@ -18,7 +18,7 @@ from flask import Flask, request, jsonify, Response, render_template
 from flask_socketio import SocketIO, send, emit
 from flask_cors import CORS
 from elevenlabs.client import ElevenLabs
-import pymongo
+from pymongo import MongoClient
 
 load_dotenv()
 
@@ -65,8 +65,7 @@ def text_to_speech():
 
 @app.route("/logs", methods=["GET"])
 def show_logs():
-    import os
-    client = pymongo.MongoClient(os.getenv("MONGODB_URI"))
+    client = MongoClient(getenv("MONGODB_URI"))
     db = client["teachme_main"]
     logs = list(db["logs"].find({}))
     return render_template("logs_template.html", logs=logs)
@@ -241,9 +240,6 @@ def run_quickstart(audio_stream: bytes) -> speech.RecognizeResponse:
 
 
 if __name__ == "__main__":
-    # import os
-    # log1 = Log(LogType.INFO, "this is an info log")
-    # print(log1)
-    # logger = Logger(pymongo.MongoClient(os.getenv("MONGODB_URI")))
-    # logger.log(log1)
+    logger = Logger(MongoClient(getenv("MONGODB_URI")))
+    logger.log(Log(LogType.INFO, "Starting Flask app"))
     system("python3 -m flask --app main run --host=0.0.0.0 --port=5000 --debug")

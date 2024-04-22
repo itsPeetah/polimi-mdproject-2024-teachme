@@ -3,12 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <title>Logs</title>
+  <style>
+    .LOG-INFO {
+      color: black
+    }
+    .LOG-ERROR {
+      color: red
+    }
+  </style>
 </head>
 <body>
   <h3>Logs</h3>
   <ul>
     {% for log in logs %}
-      <li>[{{ log.log_type }}] {{ log.message }} [{{ log.timestamp }}]</li>
+      <li class="LOG-{{ log.log_type }}">[{{ log.log_type }}] {{ log.message }} [{{ log.time_stamp }}]</li>
     {% endfor %}
   </ul>
 </body>
