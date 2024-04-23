@@ -3,6 +3,9 @@
 
 import warnings
 
+# import sys
+# sys.path.append('..')
+
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables.history import RunnableWithMessageHistory
@@ -168,20 +171,21 @@ class ConversationalChatBot(BaseChatBot):
 if __name__ == "__main__":
     from dotenv import load_dotenv
     import os
-    from database import MongoDBConnector
+    from database import MongoDBConnector, Connector, Conversation
+    from PROMPTS import get_prompt
 
     load_dotenv()
 
     chatbot = ConversationalChatBot(
         api_key=os.getenv("OPENAI_API_KEY"),
-        conversation_id=2,
-        conversation_user_level="advanced",
-        conversation_difficulty="hard",
-        conversation_topic=None,
+        conversation_id=3,
+        conversation_user_level="medium",
+        conversation_difficulty="beginner",
+        conversation_topic="The topic of the conversation is about the user's favorite hobbies.",
         db_connector=MongoDBConnector(os.getenv("MONGODB_URI")),
     )
-
-    bot_answer = chatbot.send_message(
-        "Have we ever talked about the weather so far in our conversation?"
-    )
-    print(bot_answer)
+    while True:
+        bot_answer = chatbot.send_message(
+            str(input("User message: "))
+        )
+        print(f"Bot answer: {bot_answer.content}")
