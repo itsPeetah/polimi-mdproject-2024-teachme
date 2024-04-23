@@ -1,14 +1,13 @@
 from lib.database.Connector import Connector
 from lib.log.log import Log
 
-import pymongo
-
 class Logger():
-    def __init__(self, mongo_client: pymongo.MongoClient, db_name: str = "teachme_main"):
-        self.db_name = db_name
+    def __init__(self, db_connector: Connector, db_name: str = "teachme_main"):
+        self._db_connector = db_connector
+        self._db_name = db_name
 
-        self.db = mongo_client[self.db_name]
-        self.logs = self.db["logs"]
+        db = self._db_connector.connect(self._db_name)
+        self._logs = db.get_collection("logs")
     
     def log(self, log: Log):
-        self.logs.insert_one({"log_type": log.log_type.value, "message": log.message, "time_stamp": log.time_stamp})
+        self._logs.insert_one(log_type = log.log_type, message = log.message, time_stamp = log.time_stamp)

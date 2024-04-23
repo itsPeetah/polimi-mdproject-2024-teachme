@@ -240,6 +240,6 @@ def run_quickstart(audio_stream: bytes) -> speech.RecognizeResponse:
 
 
 if __name__ == "__main__":
-    logger = Logger(MongoClient(getenv("MONGODB_URI")))
+    logger = Logger(MongoDBConnector(getenv("MONGODB_URI")))
     logger.log(Log(LogType.INFO, "Starting Flask app"))
     system("python3 -m flask --app main run --host=0.0.0.0 --port=5000 --debug")
