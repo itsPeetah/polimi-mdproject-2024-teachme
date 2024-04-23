@@ -13,7 +13,7 @@
   </style>
 </head>
 <body>
-  <h3>Logs</h3>
+  <h3>Logs {{ log_type if log_type else "" }}</h3>
   <ul>
     {% for log in logs %}
       <li class="LOG-{{ log.log_type }}">[{{ log.log_type }}] {{ log.message }} [{{ log.time_stamp }}]</li>
