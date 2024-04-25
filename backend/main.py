@@ -15,7 +15,16 @@ from lib.auth import AuthenticationService, UserAuthenticationException
 
 from dotenv import load_dotenv
 from google.cloud import speech
-from flask import Flask, request, jsonify, Response, render_template, redirect, url_for
+from flask import (
+    Flask,
+    request,
+    jsonify,
+    Response,
+    render_template,
+    redirect,
+    url_for,
+    make_response,
+)
 from flask_socketio import SocketIO, send, emit
 from flask_cors import CORS
 from elevenlabs.client import ElevenLabs
@@ -38,6 +47,7 @@ audio_buffer_handlers = {}
 
 # ROUTES
 
+
 @app.route("/", methods=["GET", "POST"])
 def hello_world():
     if request.method == "POST":
@@ -59,6 +69,7 @@ def hello_world():
 
     return html_content
 
+
 @app.route("/text-to-speech", methods=["GET"])
 def text_to_speech():
     text = request.args.get("text")
@@ -67,13 +78,16 @@ def text_to_speech():
     # response.headers.add("Access-Control-Allow-Origin", "*")
     return response
 
+
 @app.route("/logs", methods=["GET"])
 def show_all_logs():
-    return show_logs(log_type = None)
+    return show_logs(log_type=None)
+
 
 @app.route("/logs/", methods=["GET"])
 def redirect_logs_slash():
-    return redirect(url_for('show_all_logs'))
+    return redirect(url_for("show_all_logs"))
+
 
 @app.route("/logs/<log_type>", methods=["GET"])
 def show_logs(log_type):
@@ -84,20 +98,23 @@ def show_logs(log_type):
         logs = list(db["logs"].find({}))
     else:
         log_type = log_type.upper()
-        if log_type in ['INFO', 'ERROR']:
+        if log_type in ["INFO", "ERROR"]:
             logs = list(db["logs"].find({"log_type": log_type}))
         else:
-            return redirect(url_for('show_all_logs'))
+            return redirect(url_for("show_all_logs"))
     return render_template("logs_template.html", log_type=log_type, logs=logs)
+
 
 @app.route("/hello", methods=["GET"])
 def route_hello():
     return Response(status=200, response="hello, world".encode("utf-8"))
 
+
 @app.route("/now", methods=["GET"])
 def route_now():
     t_as_int = int(time.time())
     return str(t_as_int)
+
 
 @app.route("/flush", methods=["GET"])
 def flush():
@@ -152,24 +169,29 @@ def handle_is_logged_in():
 
 # WEBSOCKET
 
+
 @flask_ws.on("connect")
 def on_connected():
     sid = request.sid
     print("ws user connected", f"sid: {sid}")
     audio_buffer_handlers[sid] = BufferHanlder(sid, 500)
 
+
 @flask_ws.on("disconnected connect")
 def on_connected():
     sid = request.sid
     print("ws user disconnected", f"sid: {sid}")
 
+
 @flask_ws.on("message")
 def on_message(message):
     print("Received message:", message)
 
+
 @flask_ws.on("foo")
 def on_foo_event(data):
     print("FOO", data)
+
 
 @flask_ws.on("audio_data")
 def on_audio_data(data: bytes):
@@ -195,12 +217,14 @@ def on_audio_data(data: bytes):
             to=sid,
         )
 
+
 @flask_ws.on("transcript_data")
 def on_transcript_data(data: str):
     print("\n\n\n\n\n\n", data, end="\n\n\n\n\n\n")
     response = get_chatbot_answer(data)
     print("Chatbot answer:", response)
     emit("chatbot_response", response)
+
 
 def get_user_transcript(audio_stream: bytes) -> speech.RecognizeResponse:
     audio_headers = load_audio(audio_stream)
@@ -223,6 +247,7 @@ def get_user_transcript(audio_stream: bytes) -> speech.RecognizeResponse:
     else:
         return "Audio transcription failed"
 
+
 def get_chatbot_answer(prompt: str) -> str:
     chatbot = ConversationalChatBot(
         api_key=getenv("OPENAI_API_KEY"),
@@ -234,6 +259,7 @@ def get_chatbot_answer(prompt: str) -> str:
     )
     response = chatbot.send_message(prompt).content
     return response
+
 
 def load_audio(audio_file):
     # Getting the audio file parameters
@@ -280,6 +306,7 @@ def load_audio(audio_file):
 
     return return_dict
 
+
 def run_quickstart(audio_stream: bytes) -> speech.RecognizeResponse:
     transcript = get_user_transcript(audio_stream)
     print("User transcript:", transcript)
@@ -287,6 +314,7 @@ def run_quickstart(audio_stream: bytes) -> speech.RecognizeResponse:
     response = get_chatbot_answer(transcript)
     print("Chatbot answer:", response)
     emit("transcript", {"chatbot": response})
+
 
 if __name__ == "__main__":
 
