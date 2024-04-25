@@ -11,10 +11,20 @@ import numpy as np
 from lib.llm import ConversationalChatBot
 from lib.database import MongoDBConnector
 from lib.audio import BufferHanlder
+from lib.auth import AuthenticationService, UserAuthenticationException
 
 from dotenv import load_dotenv
 from google.cloud import speech
-from flask import Flask, request, jsonify, Response, render_template, redirect, url_for
+from flask import (
+    Flask,
+    request,
+    jsonify,
+    Response,
+    render_template,
+    redirect,
+    url_for,
+    make_response,
+)
 from flask_socketio import SocketIO, send, emit
 from flask_cors import CORS
 from elevenlabs.client import ElevenLabs
@@ -27,11 +37,16 @@ flask_ws = SocketIO(app, cors_allowed_origins="*")
 CORS(app, origins="*")
 speechClient = speech.SpeechClient()
 EL_client = ElevenLabs(api_key=getenv("ELEVENLABS_API_KEY"))
+app_db_connector = MongoDBConnector(
+    getenv("MONGODB_URI")
+)  # TEST if this works otherwise declare global client?
+user_auth = AuthenticationService(app_db_connector)
 
 audio_buffer_handlers = {}
 
 
 # ROUTES
+
 
 @app.route("/", methods=["GET", "POST"])
 def hello_world():
@@ -54,6 +69,7 @@ def hello_world():
 
     return html_content
 
+
 @app.route("/text-to-speech", methods=["GET"])
 def text_to_speech():
     text = request.args.get("text")
@@ -62,13 +78,16 @@ def text_to_speech():
     # response.headers.add("Access-Control-Allow-Origin", "*")
     return response
 
+
 @app.route("/logs", methods=["GET"])
 def show_all_logs():
-    return show_logs(log_type = None)
+    return show_logs(log_type=None)
+
 
 @app.route("/logs/", methods=["GET"])
 def redirect_logs_slash():
-    return redirect(url_for('show_all_logs'))
+    return redirect(url_for("show_all_logs"))
+
 
 @app.route("/logs/<log_type>", methods=["GET"])
 def show_logs(log_type):
@@ -79,20 +98,23 @@ def show_logs(log_type):
         logs = list(db["logs"].find({}))
     else:
         log_type = log_type.upper()
-        if log_type in ['INFO', 'ERROR']:
+        if log_type in ["INFO", "ERROR"]:
             logs = list(db["logs"].find({"log_type": log_type}))
         else:
-            return redirect(url_for('show_all_logs'))
+            return redirect(url_for("show_all_logs"))
     return render_template("logs_template.html", log_type=log_type, logs=logs)
+
 
 @app.route("/hello", methods=["GET"])
 def route_hello():
     return Response(status=200, response="hello, world".encode("utf-8"))
 
+
 @app.route("/now", methods=["GET"])
 def route_now():
-    t_as_int = int(time())
+    t_as_int = int(time.time())
     return str(t_as_int)
+
 
 @app.route("/flush", methods=["GET"])
 def flush():
@@ -102,7 +124,51 @@ def flush():
     return "Ok"
 
 
+# AUTHENTICATION
+
+
+@app.route("/register", methods=["POST"])
+def handle_sign_up():
+    try:
+        request_data = user_auth.validate_request_data(request, signup=True)
+        user = user_auth.register_user(**request_data)
+        response = make_response(redirect("/now", 302))
+        response.set_cookie(
+            key="uid", value=user._id, max_age=60 * 60 * 24 * 10
+        )  # TODO Figure this one out
+        return response
+    except UserAuthenticationException as ex:
+        print(ex)
+        return redirect("/", 400)
+
+
+@app.route("/login", methods=["POST"])
+def handle_sign_in():
+    try:
+        request_data = user_auth.validate_request_data(request, signup=False)
+        user = user_auth.get_user_by_email(request_data["email"])
+        response = make_response(redirect("/now", 302))
+        response.set_cookie(
+            key="uid", value=user._id, max_age=60 * 60 * 24 * 10
+        )  # TODO Figure this one out
+        return response
+    except UserAuthenticationException as ex:
+        print(ex)
+        return redirect("/", 400)
+
+
+@app.route("/me", methods=["GET"])
+def handle_is_logged_in():
+    # TODO Add Role differentiation
+    try:
+        uid = request.cookies["uid"]
+        return make_response("OK", 200)
+    except:
+        return make_response("KO", 401)
+
+
 # WEBSOCKET
+
 
 @flask_ws.on("connect")
 def on_connected():
@@ -110,18 +176,22 @@ def on_connected():
     print("ws user connected", f"sid: {sid}")
     audio_buffer_handlers[sid] = BufferHanlder(sid, 500)
 
+
 @flask_ws.on("disconnected connect")
 def on_connected():
     sid = request.sid
     print("ws user disconnected", f"sid: {sid}")
 
+
 @flask_ws.on("message")
 def on_message(message):
     print("Received message:", message)
 
+
 @flask_ws.on("foo")
 def on_foo_event(data):
     print("FOO", data)
+
 
 @flask_ws.on("audio_data")
 def on_audio_data(data: bytes):
@@ -147,12 +217,14 @@ def on_audio_data(data: bytes):
             to=sid,
         )
 
+
 @flask_ws.on("transcript_data")
 def on_transcript_data(data: str):
     print("\n\n\n\n\n\n", data, end="\n\n\n\n\n\n")
     response = get_chatbot_answer(data)
     print("Chatbot answer:", response)
     emit("chatbot_response", response)
+
 
 def get_user_transcript(audio_stream: bytes) -> speech.RecognizeResponse:
     audio_headers = load_audio(audio_stream)
@@ -175,6 +247,7 @@ def get_user_transcript(audio_stream: bytes) -> speech.RecognizeResponse:
     else:
         return "Audio transcription failed"
 
+
 def get_chatbot_answer(prompt: str) -> str:
     chatbot = ConversationalChatBot(
         api_key=getenv("OPENAI_API_KEY"),
@@ -182,10 +255,11 @@ def get_chatbot_answer(prompt: str) -> str:
         conversation_user_level="intermediate",
         conversation_difficulty="medium",
         conversation_topic="Discussing the weather",
-        db_connector=MongoDBConnector(getenv("MONGODB_URI")),
+        db_connector=app_db_connector,
     )
     response = chatbot.send_message(prompt).content
     return response
+
 
 def load_audio(audio_file):
     # Getting the audio file parameters
@@ -232,6 +306,7 @@ def load_audio(audio_file):
 
     return return_dict
 
+
 def run_quickstart(audio_stream: bytes) -> speech.RecognizeResponse:
     transcript = get_user_transcript(audio_stream)
     print("User transcript:", transcript)
@@ -240,7 +315,9 @@ def run_quickstart(audio_stream: bytes) -> speech.RecognizeResponse:
     print("Chatbot answer:", response)
     emit("transcript", {"chatbot": response})
 
+
 if __name__ == "__main__":
+
     logger = Logger(MongoDBConnector(getenv("MONGODB_URI")))
     logger.log(Log(LogType.INFO, "Starting Flask app"))
     system("python3 -m flask --app main run --host=0.0.0.0 --port=5000 --debug")
