@@ -4,10 +4,10 @@ Module containing classes for managing collections in the database.
 
 # pylint: disable=line-too-long
 
+from datetime import datetime
 from typing import List, Optional
-
+from lib.log.log import LogType
 from .data_objects import Conversation, User
-
 
 class Collection:
     """
@@ -154,8 +154,40 @@ class ChatMessageHistoryCollection(Collection):
         """
         super().__init__(collection, collection_name)
 
+class LogsCollection(Collection):
+    """
+    Represents a collection of logs in the database.
+    """
+    def __init__(self, collection, collection_name: str) -> None:
+        """
+        Initialize a LogsCollection object.
 
-class CollectionDispatcher:
+        :param collection: the collection object from the database
+        :type collection: any
+        :param collection_name: name of the collection
+        :type collection_name: str
+        """
+        super().__init__(collection, collection_name)
+    
+    def insert_one(self, log_type: LogType, message: str, time_stamp: datetime = None):
+        """
+        Insert a new conversation into the collection.
+
+        :param log_type: type of the log
+        :type log_type: LogType
+        :param message: message of the log
+        :type message: str
+        :param time_stamp: timestamp of the log
+        :type time_stamp: datetime
+        """
+        log = {
+            "log_type": log_type.value,
+            "message": message,
+            "time_stamp": time_stamp,
+        }
+        self._collection.insert_one(log)
+
+class CollectionDispatcher():
     """
     Dispatcher class for managing collections in the database.
     """
@@ -189,9 +221,9 @@ class CollectionDispatcher:
             return ConversationsCollection(self._db[collection_name], collection_name)
         elif collection_name == "user_data":
             return UserDataCollection(self._db[collection_name], collection_name)
-        elif collection_name == "chat_message_history":
-            return ChatMessageHistoryCollection(
-                self._db[collection_name], collection_name
-            )
+        elif collection_name=='chat_message_history':
+            return ChatMessageHistoryCollection(self._db[collection_name], collection_name)
+        elif collection_name=='logs':
+            return LogsCollection(self._db[collection_name], collection_name)
         else:
             return Collection(self._db[collection_name], collection_name)

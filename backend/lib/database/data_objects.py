@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Optional
-
+from datetime import datetime
+from lib.log.log import LogType
 
 @dataclass
 class User:
@@ -48,3 +49,13 @@ class ChatMessage:
     sender_id: int
     message: str
     timestamp: int
+
+@dataclass
+class Log:
+    """
+    Represents a log message.
+    """
+    log_type: LogType
+    message: str
+    time_stamp: datetime
+    
