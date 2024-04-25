@@ -1,16 +1,19 @@
 """
 Module containing classes for managing collections in the database.
 """
+
 # pylint: disable=line-too-long
 
-from typing import List
+from typing import List, Optional
 
-from .data_objects import Conversation
+from .data_objects import Conversation, User
 
-class Collection():
+
+class Collection:
     """
     Represents a generic collection in the database.
     """
+
     def __init__(self, collection, collection_name: str) -> None:
         """
         Initialize a Collection object.
@@ -33,16 +36,18 @@ class Collection():
         """
         return self._collection_name
 
+
 class ConversationsCollection(Collection):
     """
     Represents a collection of conversations in the database.
-    
+
     Each conversation has the following fields:
     - conversation_id: int
     - user_level: str
     - difficulty: str
     - topic: str
     """
+
     def __init__(self, collection, collection_name: str) -> None:
         """
         Initialize a ConversationsCollection object.
@@ -63,10 +68,22 @@ class ConversationsCollection(Collection):
         :return: the conversation object
         :rtype: Conversation
         """
-        conversation_to_return = self._collection.find_one({"conversation_id": conversation_id})
-        return Conversation(**conversation_to_return) if conversation_to_return is not None else None
+        conversation_to_return = self._collection.find_one(
+            {"conversation_id": conversation_id}
+        )
+        return (
+            Conversation(**conversation_to_return)
+            if conversation_to_return is not None
+            else None
+        )
 
-    def insert_one(self, conversation_id: int, user_level: str = None, difficulty: str = None, topic: str = None):
+    def insert_one(
+        self,
+        conversation_id: int,
+        user_level: str = None,
+        difficulty: str = None,
+        topic: str = None,
+    ):
         """
         Insert a new conversation into the collection.
 
@@ -87,10 +104,12 @@ class ConversationsCollection(Collection):
         }
         self._collection.insert_one(conversation)
 
+
 class UserDataCollection(Collection):
     """
     Represents a collection of user data in the database.
     """
+
     def __init__(self, collection, collection_name: str) -> None:
         """
         Initialize a UserDataCollection object.
@@ -102,10 +121,28 @@ class UserDataCollection(Collection):
         """
         super().__init__(collection, collection_name)
 
+    def register(self, user: User) -> User:
+        self._collection.insert_one(user.__dict__)
+        return user
+
+    def retrieve_by_id(self, user_id: str) -> Optional[User]:
+        user = self._collection.find_one({"_id": user_id})
+        if not user:
+            return None
+        return User(**user)
+
+    def retrieve_by_email(self, email: str) -> User:
+        user = self._collection.find_one({"email": email})
+        if not user:
+            return None
+        return User(**user)
+
+
 class ChatMessageHistoryCollection(Collection):
     """
     Represents a collection of chat message history in the database.
     """
+
     def __init__(self, collection, collection_name: str) -> None:
         """
         Initialize a ChatMessageHistoryCollection object.
@@ -117,10 +154,12 @@ class ChatMessageHistoryCollection(Collection):
         """
         super().__init__(collection, collection_name)
 
-class CollectionDispatcher():
+
+class CollectionDispatcher:
     """
     Dispatcher class for managing collections in the database.
     """
+
     def __init__(self, collection_names: List[str], db) -> None:
         """
         Initialize a CollectionDispatcher object.
@@ -146,11 +185,13 @@ class CollectionDispatcher():
             raise KeyError(f"Collection {collection_name} not found in the database.")
 
         # switching to the correct collection
-        if collection_name=='conversations':
+        if collection_name == "conversations":
             return ConversationsCollection(self._db[collection_name], collection_name)
-        elif collection_name=='user_data':
+        elif collection_name == "user_data":
             return UserDataCollection(self._db[collection_name], collection_name)
-        elif collection_name=='chat_message_history':
-            return ChatMessageHistoryCollection(self._db[collection_name], collection_name)
+        elif collection_name == "chat_message_history":
+            return ChatMessageHistoryCollection(
+                self._db[collection_name], collection_name
+            )
         else:
             return Collection(self._db[collection_name], collection_name)

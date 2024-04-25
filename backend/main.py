@@ -9,10 +9,11 @@ import numpy as np
 from lib.llm import ConversationalChatBot
 from lib.database import MongoDBConnector
 from lib.audio import BufferHanlder
+from lib.auth import AuthenticationService, UserAuthenticationException
 
 from dotenv import load_dotenv
 from google.cloud import speech
-from flask import Flask, request, jsonify, Response
+from flask import Flask, request, jsonify, Response, make_response, redirect
 from flask_socketio import SocketIO, send, emit
 from flask_cors import CORS
 from elevenlabs.client import ElevenLabs
@@ -24,6 +25,10 @@ flask_ws = SocketIO(app, cors_allowed_origins="*")
 CORS(app, origins="*")
 speechClient = speech.SpeechClient()
 EL_client = ElevenLabs(api_key=getenv("ELEVENLABS_API_KEY"))
+app_db_connector = MongoDBConnector(
+    getenv("MONGODB_URI")
+)  # TEST if this works otherwise declare global client?
+user_auth = AuthenticationService(app_db_connector)
 
 audio_buffer_handlers = {}
 
@@ -68,7 +73,7 @@ def route_hello():
 
 @app.route("/now", methods=["GET"])
 def route_now():
-    t_as_int = int(time())
+    t_as_int = int(time.time())
     return str(t_as_int)
 
 
@@ -78,6 +83,49 @@ def flush():
         v.save_audio_to_wav()
         v.buffer.clear()
     return "Ok"
+
+
+# AUTHENTICATION
+
+
+@app.route("/register", methods=["POST"])
+def handle_sign_up():
+    try:
+        request_data = user_auth.validate_request_data(request, signup=True)
+        user = user_auth.register_user(**request_data)
+        response = make_response(redirect("/now", 302))
+        response.set_cookie(
+            key="uid", value=user._id, max_age=60 * 60 * 24 * 10
+        )  # TODO Figure this one out
+        return response
+    except UserAuthenticationException as ex:
+        print(ex)
+        return redirect("/", 400)
+
+
+@app.route("/login", methods=["POST"])
+def handle_sign_in():
+    try:
+        request_data = user_auth.validate_request_data(request, signup=False)
+        user = user_auth.get_user_by_email(request_data["email"])
+        response = make_response(redirect("/now", 302))
+        response.set_cookie(
+            key="uid", value=user._id, max_age=60 * 60 * 24 * 10
+        )  # TODO Figure this one out
+        return response
+    except UserAuthenticationException as ex:
+        print(ex)
+        return redirect("/", 400)
+
+
+@app.route("/me", methods=["GET"])
+def handle_is_logged_in():
+    # TODO Add Role differentiation
+    try:
+        uid = request.cookies["uid"]
+        return make_response("OK", 200)
+    except:
+        return make_response("KO", 401)
 
 
 # WEBSOCKET
@@ -168,7 +216,7 @@ def get_chatbot_answer(prompt: str) -> str:
         conversation_user_level="intermediate",
         conversation_difficulty="medium",
         conversation_topic="Discussing the weather",
-        db_connector=MongoDBConnector(getenv("MONGODB_URI")),
+        db_connector=app_db_connector,
     )
     response = chatbot.send_message(prompt).content
     return response
@@ -230,4 +278,5 @@ def run_quickstart(audio_stream: bytes) -> speech.RecognizeResponse:
 
 
 if __name__ == "__main__":
+    print("Starting Flask App")
     system("python3 -m flask --app main run --host=0.0.0.0 --port=5000 --debug")
