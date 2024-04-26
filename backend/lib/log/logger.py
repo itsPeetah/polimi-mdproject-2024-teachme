@@ -1,5 +1,5 @@
-from lib.database.Connector import Connector
-from lib.log.log import Log
+from ..database import Connector
+from .log import Log
 
 class Logger():
     def __init__(self, db_connector: Connector, db_name: str = "teachme_main"):

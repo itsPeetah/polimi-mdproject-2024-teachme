@@ -4,14 +4,7 @@ import io
 
 from os import system, getenv
 
-from lib.log.logger import Logger
-from lib.log.log import Log, LogType
 import numpy as np
-
-from lib.llm import ConversationalChatBot
-from lib.database import MongoDBConnector
-from lib.audio import BufferHanlder
-from lib.auth import AuthenticationService, UserAuthenticationException
 
 from dotenv import load_dotenv
 from google.cloud import speech
@@ -29,6 +22,13 @@ from flask_socketio import SocketIO, send, emit
 from flask_cors import CORS
 from elevenlabs.client import ElevenLabs
 from pymongo import MongoClient
+
+from lib.llm import ConversationalChatBot
+from lib.database import MongoDBConnector
+from lib.audio import BufferHanlder
+from lib.auth import AuthenticationService, UserAuthenticationException
+from lib.log import Logger
+from lib.log import Log, LogType
 
 load_dotenv()
 
@@ -226,7 +226,7 @@ def on_transcript_data(data: str):
     emit("chatbot_response", response)
 
 
-def get_user_transcript(audio_stream: bytes) -> speech.RecognizeResponse:
+def get_user_transcript(audio_stream: bytes) -> speech.RecognizeResponse: # TODO: DEPRECATED TO ADJUST WITH NEW LOGIC
     audio_headers = load_audio(audio_stream)
     print(audio_headers)
     audio = speech.RecognitionAudio(content=audio_stream)
@@ -261,7 +261,7 @@ def get_chatbot_answer(prompt: str) -> str:
     return response
 
 
-def load_audio(audio_file):
+def load_audio(audio_file): # TODO: DEPRECATED TO ADJUST WITH NEW LOGIC (useless, could be removed)
     # Getting the audio file parameters
     # Read the header to get audio file information
     audio_file = io.BytesIO(audio_file)

@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Optional
 from datetime import datetime
-from lib.log.log import LogType
+from ..log import LogType
 
 @dataclass
 class User:

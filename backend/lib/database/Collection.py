@@ -6,7 +6,7 @@ Module containing classes for managing collections in the database.
 
 from datetime import datetime
 from typing import List, Optional
-from lib.log.log import LogType
+from ..log import LogType
 from .data_objects import Conversation, User
 
 class Collection:
