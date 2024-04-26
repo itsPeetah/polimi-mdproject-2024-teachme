@@ -162,7 +162,9 @@ def handle_is_logged_in():
     # TODO Add Role differentiation
     try:
         uid = request.cookies["uid"]
-        return make_response("OK", 200)
+        print(uid)
+        user = user_auth.get_user_by_id(uid)
+        return jsonify({"user_id": user._id, "role": user.role})
     except:
         return make_response("KO", 401)
 
@@ -226,7 +228,9 @@ def on_transcript_data(data: str):
     emit("chatbot_response", response)
 
 
-def get_user_transcript(audio_stream: bytes) -> speech.RecognizeResponse: # TODO: DEPRECATED TO ADJUST WITH NEW LOGIC
+def get_user_transcript(
+    audio_stream: bytes,
+) -> speech.RecognizeResponse:  # TODO: DEPRECATED TO ADJUST WITH NEW LOGIC
     audio_headers = load_audio(audio_stream)
     print(audio_headers)
     audio = speech.RecognitionAudio(content=audio_stream)
@@ -261,7 +265,9 @@ def get_chatbot_answer(prompt: str) -> str:
     return response
 
 
-def load_audio(audio_file): # TODO: DEPRECATED TO ADJUST WITH NEW LOGIC (useless, could be removed)
+def load_audio(
+    audio_file,
+):  # TODO: DEPRECATED TO ADJUST WITH NEW LOGIC (useless, could be removed)
     # Getting the audio file parameters
     # Read the header to get audio file information
     audio_file = io.BytesIO(audio_file)
