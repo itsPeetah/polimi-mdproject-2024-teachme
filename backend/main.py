@@ -162,6 +162,7 @@ def handle_is_logged_in():
     # TODO Add Role differentiation
     try:
         uid = request.cookies["uid"]
+        print(uid)
         user = user_auth.get_user_by_id(uid)
         return jsonify({"user_id": user._id, "role": user.role})
     except:
