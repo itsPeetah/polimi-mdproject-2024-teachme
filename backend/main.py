@@ -41,6 +41,7 @@ app_db_connector = MongoDBConnector(
     getenv("MONGODB_URI")
 )  # TEST if this works otherwise declare global client?
 user_auth = AuthenticationService(app_db_connector)
+logger = Logger(app_db_connector)
 
 audio_buffer_handlers = {}
 
@@ -93,7 +94,7 @@ def redirect_logs_slash():
 def show_logs(log_type):
     client = MongoClient(getenv("MONGODB_URI"))
     db = client["teachme_main"]
-
+    # TODO: wrappa come se fosse una piadina messicana.
     if log_type is None:
         logs = list(db["logs"].find({}))
     else:
@@ -323,7 +324,5 @@ def run_quickstart(audio_stream: bytes) -> speech.RecognizeResponse:
 
 
 if __name__ == "__main__":
-
-    logger = Logger(MongoDBConnector(getenv("MONGODB_URI")))
     logger.log(Log(LogType.INFO, "Starting Flask app"))
     system("python3 -m flask --app main run --host=0.0.0.0 --port=5000 --debug")
