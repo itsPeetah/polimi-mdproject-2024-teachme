@@ -92,15 +92,16 @@ def redirect_logs_slash():
 
 @app.route("/logs/<log_type>", methods=["GET"])
 def show_logs(log_type):
-    client = MongoClient(getenv("MONGODB_URI"))
-    db = client["teachme_main"]
-    # TODO: wrappa come se fosse una piadina messicana.
+    db = app_db_connector.connect("teachme_main")
+    logs_collection = db.get_collection("logs")
     if log_type is None:
-        logs = list(db["logs"].find({}))
+        logs = logs_collection.retrieve_all()
     else:
         log_type = log_type.upper()
-        if log_type in ["INFO", "ERROR"]:
-            logs = list(db["logs"].find({"log_type": log_type}))
+        if log_type == "INFO":
+            logs = logs_collection.retrieve_by_log_type(LogType.INFO)
+        elif log_type == "ERROR":
+            logs = logs_collection.retrieve_by_log_type(LogType.ERROR)
         else:
             return redirect(url_for("show_all_logs"))
     return render_template("logs_template.html", log_type=log_type, logs=logs)

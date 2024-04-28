@@ -169,6 +169,12 @@ class LogsCollection(Collection):
         """
         super().__init__(collection, collection_name)
     
+    def retrieve_all(self):
+        return list(self._collection.find({}))
+    
+    def retrieve_by_log_type(self, log_type: LogType):
+        return list(self._collection.find({"log_type": log_type.value}))
+    
     def insert_one(self, log_type: LogType, message: str, time_stamp: datetime = None):
         """
         Insert a new conversation into the collection.
