@@ -124,6 +124,128 @@ class UserDataCollection(Collection):
     def register(self, user: User) -> User:
         self._collection.insert_one(user.__dict__)
         return user
+    
+    def create_friendship_using_email(self, teacher_email: str, student_email: str):
+        """
+        Creates a two-way friendship between teacher and student in the database.
+
+        Args:
+            teacher_email (str): email of the teacher
+            student_email (str): email of the student
+        
+        Raises:
+            ValueError: If teacher or student is not found in the database.
+        """
+
+        teacher = self.retrieve_by_email(teacher_email)
+        student = self.retrieve_by_email(student_email)
+
+        if not teacher:
+            raise ValueError(f"Teacher with email '{teacher_email}' not found")
+        if not student:
+            raise ValueError(f"Student with email '{student_email}' not found")
+        
+        existing_friendship = self._collection.find_one({"$or": [{"email": student_email, "friends": teacher_email}, {"email": teacher_email, "friends": student_email}]})
+        if existing_friendship:
+            print(f"Friendship between {teacher.email} and {student.email} already exists.")
+        else:
+            update_student = {"$push": {"friends": teacher.email}}
+            result_student = self._collection.update_one({"email": student.email}, update_student)
+
+            update_teacher = {"$push": {"friends": student.email}}
+            result_teacher = self._collection.update_one({"email": teacher.email}, update_teacher)
+
+            if result_student.matched_count > 0 and result_teacher.matched_count > 0:
+                print(f"Successfully created friendship between {teacher.email} and {student.email}")
+            else:
+                print(f"An error occurred while creating friendship between {teacher.email} and {student.email}")
+
+    def create_friendship_using_id(self, teacher_id: str, student_id: str):
+        """
+        Creates a two-way friendship between teacher and student in the database.
+
+        Args:
+            teacher_id (str): id of the teacher
+            student_id (str): id of the student
+        
+        Raises:
+            ValueError: If teacher or student is not found in the database.
+        """
+
+        teacher = self.retrieve_by_id(teacher_id)
+        student = self.retrieve_by_id(student_id)
+
+        if not teacher:
+            raise ValueError(f"Teacher with id '{teacher_id}' not found")
+        if not student:
+            raise ValueError(f"Student with id '{student_id}' not found")
+        
+        self.create_friendship(teacher.email, student.email)
+
+    def remove_friendship_using_email(self, teacher_email: str, student_email: str):
+        """
+        Removes friendship between teacher and student.
+
+        Args:
+            teacher_email (str): email of the teacher
+            student_email (str): email of the student
+        
+        Raises:
+            ValueError: If teacher or student is not found in the database.
+        """
+        teacher = self.retrieve_by_email(teacher_email)
+        student = self.retrieve_by_email(student_email)
+
+        if not teacher:
+            raise ValueError(f"Teacher with email '{teacher_email}' not found")
+        if not student:
+            raise ValueError(f"Student with email '{student_email}' not found")
+        
+        update_student = {"$pull": {"friends": teacher.email}}
+        update_teacher = {"$pull": {"friends": student.email}}
+
+        result_student = self._collection.update_one({"email": student.email}, update_student)
+        result_teacher = self._collection.update_one({"email": teacher.email}, update_teacher)
+
+        if (result_student.matched_count > 0 or result_teacher.matched_count > 0) and (result_student.modified_count > 0 or result_teacher.modified_count > 0):
+            print(f"Successfully removed friendship between {teacher.email} and {student.email}")
+        else:
+            print(f"No friendship found to remove.")
+
+    def remove_friendship_using_id(self, teacher_id: str, student_id: str):
+        """
+        Removes friendship between teacher and student.
+
+        Args:
+            teacher_id (str): id of the teacher
+            student_id (str): id of the student
+        
+        Raises:
+            ValueError: If teacher or student is not found in the database.
+        """
+        teacher = self.retrieve_by_id(teacher_id)
+        student = self.retrieve_by_id(student_id)
+
+        if not teacher:
+            raise ValueError(f"Teacher with id '{teacher_id}' not found")
+        if not student:
+            raise ValueError(f"Student with id '{student_id}' not found")
+        
+        self.remove_friendship_using_email(teacher.email, student.email)
+    
+    def get_user_friends(self, user_email: str) -> List[User]:
+        user = self.retrieve_by_email(user_email)
+
+        if not user:
+            raise ValueError(f"User with email {user_email} not found")
+        
+        friends_cursor = self._collection.find({"email": {"$in": user.friends}})
+        friends = []
+        for friend in friends_cursor:
+            user = self.retrieve_by_email(friend)
+            if user:
+                friends.append(user)
+        return friends
 
     def retrieve_by_id(self, user_id: str) -> Optional[User]:
         user = self._collection.find_one({"_id": user_id})
