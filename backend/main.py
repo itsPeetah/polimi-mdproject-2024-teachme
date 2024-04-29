@@ -92,15 +92,16 @@ def redirect_logs_slash():
 
 @app.route("/logs/<log_type>", methods=["GET"])
 def show_logs(log_type):
-    client = MongoClient(getenv("MONGODB_URI"))
-    db = client["teachme_main"]
-    # TODO: wrappa come se fosse una piadina messicana.
+    db = app_db_connector.connect("teachme_main")
+    logs_collection = db.get_collection("logs")
     if log_type is None:
-        logs = list(db["logs"].find({}))
+        logs = logs_collection.retrieve_all()
     else:
         log_type = log_type.upper()
-        if log_type in ["INFO", "ERROR"]:
-            logs = list(db["logs"].find({"log_type": log_type}))
+        if log_type == "INFO":
+            logs = logs_collection.retrieve_by_log_type(LogType.INFO)
+        elif log_type == "ERROR":
+            logs = logs_collection.retrieve_by_log_type(LogType.ERROR)
         else:
             return redirect(url_for("show_all_logs"))
     return render_template("logs_template.html", log_type=log_type, logs=logs)
@@ -123,6 +124,24 @@ def flush():
         v.save_audio_to_wav()
         v.buffer.clear()
     return "Ok"
+
+@app.route("/create-friendship", methods=["POST"])
+def create_friendship():
+    data = request.get_json()
+    teacher_email = data.get("teacher_email")
+    student_email = data.get("student_email")
+    db = app_db_connector.connect("teachme_main")
+    user_data_collection = db.get_collection("user_data")
+    user_data_collection.create_friendship_using_email(teacher_email=teacher_email, student_email=student_email) # TODO: add better error management
+
+@app.route("/get-friends", methods=["GET"])
+def get_friends():
+    data = request.get_json()
+    user_email = data.get("user_email")
+    db = app_db_connector.connect("teachme_main")
+    user_data_collection = db.get_collection("user_data")
+    user_friends = user_data_collection.get_user_friends(user_email=user_email)
+    return jsonify(user_friends)
 
 
 # AUTHENTICATION
@@ -324,5 +343,6 @@ def run_quickstart(audio_stream: bytes) -> speech.RecognizeResponse:
 
 
 if __name__ == "__main__":
-    logger.log(Log(LogType.INFO, "Starting Flask app"))
+    # user_auth.make_friends()
+    #logger.log(Log(LogType.INFO, "Starting Flask app"))
     system("python3 -m flask --app main run --host=0.0.0.0 --port=5000 --debug")

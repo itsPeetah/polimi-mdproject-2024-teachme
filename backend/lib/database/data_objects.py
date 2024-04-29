@@ -16,7 +16,7 @@ class User:
     role: str
     friends: list[
         str
-    ]  # ids for stuends this is teachers and for teachers this is students
+    ]  # ids: for students this is teachers and for teachers this is students
 
 
 # u1 = User(
