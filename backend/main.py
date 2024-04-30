@@ -23,7 +23,7 @@ from flask_cors import CORS
 from elevenlabs.client import ElevenLabs
 from pymongo import MongoClient
 
-from lib.llm import ConversationalChatBot
+from lib.llm import ConversationalChatBot, test_chatbot
 from lib.database import MongoDBConnector
 from lib.audio import BufferHanlder
 from lib.auth import AuthenticationService, UserAuthenticationException
@@ -346,3 +346,12 @@ if __name__ == "__main__":
     # user_auth.make_friends()
     #logger.log(Log(LogType.INFO, "Starting Flask app"))
     system("python3 -m flask --app main run --host=0.0.0.0 --port=5000 --debug")
+    # test_chatbot(
+    #     api_key=getenv("OPENAI_API_KEY"),
+    #     conversation_id=2123,
+    #     conversation_user_level="intermediate",
+    #     conversation_difficulty="medium",
+    #     conversation_topic="The conversation topic is left free.",
+    #     db_connector=app_db_connector,
+    #     db_name="teachme_main",
+    # )
