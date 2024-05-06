@@ -12,9 +12,9 @@ class UserAuthenticationException(Exception):
 
 
 class AuthenticationService:
-    def __init__(self, db_connector):
-        db = db_connector.connect()
+    def __init__(self, db):
         self.user_collection = db.get_collection("user_data")
+        self.conversation_collection = db.get_collection("conversations")
 
     def _generate_user_id(self) -> str:
         user_id = str(uuid4())
@@ -93,6 +93,11 @@ class AuthenticationService:
         return self.user_collection.register(user_obj)
     
     # FOR TESTING PURPOSES
+
+    # def create_conversation(self):
+    #     self.conversation_collection.create_conversation(teacher_email = "a.com", student_email = "b.com")
+
+
     # def make_friends(self):
     #     self.user_collection.create_friendship_using_email("pie8@mail.com", "pie7@mail.com")
 

@@ -1,1 +1,1 @@
-from .chatbot import ConversationalChatBot
+from .chatbot import ConversationalChatBot, test_chatbot
