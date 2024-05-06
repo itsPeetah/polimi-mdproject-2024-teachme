@@ -46,6 +46,8 @@ class ConversationsCollection(Collection):
     - user_level: str
     - difficulty: str
     - topic: str
+    - teacher_email: str
+    - student_email: str
     """
 
     def __init__(self, collection, collection_name: str) -> None:
@@ -76,6 +78,59 @@ class ConversationsCollection(Collection):
             if conversation_to_return is not None
             else None
         )
+    
+    def get_user_conversations(self, user_email: str) -> list[Conversation]:
+        """
+        Returns all the conversations that the user is involved in.
+        If the user is a teacher, this method returns all the conversations that the user created.
+        If the user is a student, this method returns all the conversations that were assigned to the user.
+
+        Args:
+            user_email (str): Email of the student
+        
+        Returns:
+            list[Conversation]: A list of Conversation objects the user is involved in.
+        """
+        query = {"$or": [
+            {"teacher_email": user_email},
+            {"student_email": user_email},
+        ]}
+        conversation_cursor = self._collection.find(query)
+        conversations = [Conversation(**conversation) for conversation in conversation_cursor]
+        return conversations
+    
+    def create_conversation(self,
+                            user_level: str = None,
+                            difficulty: str = None,
+                            topic: str = None,
+                            teacher_email: str = None,
+                            student_email: str = None):
+        """
+        Creates a new conversation in the database.
+
+        Args:
+            user_level (str, optional): Level of the user.
+            difficulty (str, optional): Difficulty of the conversation.
+            topic (str, optional): Topic of the conversation.
+            teacher_email (str, optional): Email of the teacher who created the conversation.
+            student_email (str, optional): Email of the student whom the conversation was created for.
+
+        Returns:
+            dict: A dictionary containing the details of the created conversation, including the assigned ID (_id) and all other attributes of the Conversation object.
+        """
+
+        conversation_dict = {
+            "user_level": user_level,
+            "difficulty": difficulty,
+            "topic": topic,
+            "teacher_email": teacher_email,
+            "student_email": student_email,
+        }
+        result = self._collection.insert_one(conversation_dict)
+
+        conversation_dict["_id"] = result.inserted_id
+
+        return conversation_dict
 
     def insert_one(
         self,
@@ -83,6 +138,8 @@ class ConversationsCollection(Collection):
         user_level: str = None,
         difficulty: str = None,
         topic: str = None,
+        teacher_email: str = None,
+        student_email: str = None
     ):
         """
         Insert a new conversation into the collection.
@@ -95,12 +152,18 @@ class ConversationsCollection(Collection):
         :type difficulty: str, optional
         :param topic: topic of the conversation, defaults to None
         :type topic: str, optional
+        :param teacher_email: email of the teacher who created the conversation, default to None
+        :type teacher_email: str, optional
+        :param student_email: email of the student whom the conversation was created for, default to None
+        :type student_email: str, optional
         """
         conversation = {
             "conversation_id": conversation_id,
             "user_level": user_level,
             "difficulty": difficulty,
             "topic": topic,
+            "teacher_email": teacher_email,
+            "student_email": student_email,
         }
         self._collection.insert_one(conversation)
 
@@ -234,6 +297,14 @@ class UserDataCollection(Collection):
         self.remove_friendship_using_email(teacher.email, student.email)
     
     def get_user_friends(self, user_email: str) -> List[User]:
+        """
+        Returns all the friends of the user.
+        If the user is a teacher, this method returns all the teacher's students.
+        If the user is a student, this method returns all the student's teachers.
+
+        Args:
+            user_email (str): email of the student
+        """
         user = self.retrieve_by_email(user_email)
 
         if not user:
@@ -246,7 +317,7 @@ class UserDataCollection(Collection):
             if user:
                 friends.append(user)
         return friends
-
+        
     def retrieve_by_id(self, user_id: str) -> Optional[User]:
         user = self._collection.find_one({"_id": user_id})
         if not user:

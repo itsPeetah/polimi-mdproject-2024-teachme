@@ -30,12 +30,13 @@ class Conversation:
     """
     Represents a conversation.
     """
-
     _id: any
     conversation_id: int
     user_level: str
     difficulty: str
     topic: str
+    teacher_email: str
+    student_email: str
 
 
 @dataclass

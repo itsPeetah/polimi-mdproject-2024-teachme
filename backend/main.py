@@ -345,4 +345,5 @@ def run_quickstart(audio_stream: bytes) -> speech.RecognizeResponse:
 if __name__ == "__main__":
     # user_auth.make_friends()
     #logger.log(Log(LogType.INFO, "Starting Flask app"))
+    #conv_dict = user_auth.create_conversation()
     system("python3 -m flask --app main run --host=0.0.0.0 --port=5000 --debug")
