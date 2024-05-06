@@ -12,8 +12,7 @@ class UserAuthenticationException(Exception):
 
 
 class AuthenticationService:
-    def __init__(self, db_connector):
-        db = db_connector.connect()
+    def __init__(self, db):
         self.user_collection = db.get_collection("user_data")
         self.conversation_collection = db.get_collection("conversations")
 
