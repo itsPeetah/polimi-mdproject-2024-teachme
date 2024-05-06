@@ -40,8 +40,9 @@ EL_client = ElevenLabs(api_key=getenv("ELEVENLABS_API_KEY"))
 app_db_connector = MongoDBConnector(
     getenv("MONGODB_URI")
 )  # TEST if this works otherwise declare global client?
-user_auth = AuthenticationService(app_db_connector)
-logger = Logger(app_db_connector)
+db = app_db_connector.connect("teachme_main")
+user_auth = AuthenticationService(db)
+logger = Logger(db)
 
 audio_buffer_handlers = {}
 
@@ -344,7 +345,8 @@ def run_quickstart(audio_stream: bytes) -> speech.RecognizeResponse:
 
 if __name__ == "__main__":
     # user_auth.make_friends()
-    #logger.log(Log(LogType.INFO, "Starting Flask app"))
+    # logger.log(Log(LogType.INFO, "Starting Flask app"))
+    #conv_dict = user_auth.create_conversation()
     system("python3 -m flask --app main run --host=0.0.0.0 --port=5000 --debug")
     # test_chatbot(
     #     api_key=getenv("OPENAI_API_KEY"),
