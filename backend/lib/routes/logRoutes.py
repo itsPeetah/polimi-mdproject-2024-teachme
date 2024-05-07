@@ -1,7 +1,7 @@
 from flask import Flask, redirect, render_template, url_for
 
 from lib.log.log import LogType
-from lib.database.Database import MongoDB
+from lib.database import MongoDB
 
 
 def register_log_routes(app: Flask, db: MongoDB):

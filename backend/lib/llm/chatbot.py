@@ -94,12 +94,17 @@ class ConversationalChatBot(BaseChatBot):
         # while if the others are not found, set them to default values.
         if self._conversation_id is None:
             raise ValueError("The conversation ID must be set.")
+
         if self._conversation_user_level is None:
             self._conversation_user_level = "intermediate"
+
         if self._conversation_difficulty is None:
             self._conversation_difficulty = "medium"
+
         if self._conversation_topic is None:
             self._conversation_topic = "No specific topic has been set. The conversation is open to any topic."
+        else:
+            self._conversation_topic = f"The conversation topic is {self._conversation_topic}."
 
         self._chat = None
         self._config = None
