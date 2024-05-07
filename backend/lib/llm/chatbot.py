@@ -3,15 +3,11 @@
 
 import warnings
 
-# import sys
-# sys.path.append('..')
-
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_mongodb.chat_message_histories import MongoDBChatMessageHistory
-# from langchain.chains import OpenAIModerationChain
 
 from .PROMPTS import get_prompt
 from ..database import Connector, MongoDBConnector, Conversation
@@ -41,15 +37,13 @@ class BaseChatBot:
             api_key=self.api_key,
             temperature=temperature,
         )
-        
-        # self.content_mod_chain = OpenAIModerationChain()
 
 
 class ConversationalChatBot(BaseChatBot):
     def __init__(
         self,
         api_key: str,
-        conversation_id: int,
+        conversation_id: str,
         conversation_user_level: str = None,
         conversation_difficulty: str = None,
         conversation_topic: str = None,
@@ -71,23 +65,27 @@ class ConversationalChatBot(BaseChatBot):
             conversations = db.get_collection("conversations")
             conversation = conversations.find_by_id(conversation_id)
             if conversation is None:
-                conversation = Conversation(
-                    _id = None,
-                    conversation_id=conversation_id, 
-                    user_level=conversation_user_level, 
-                    difficulty=conversation_difficulty, 
-                    topic=conversation_topic
+                print("Conversation not found in the database. Creating a new one...")
+                # TODO: check the conversation creation logic.
+                # This shouldn't be the correct place to do this stuff...
+                conversation = conversations.create_conversation(
+                    user_level = conversation_user_level,
+                    difficulty = conversation_difficulty,
+                    topic = conversation_topic,
+                    teacher_email = None,
+                    student_email = None,
+                    is_active = True,
                 )
-                conversations.insert_one(conversation_id = conversation.conversation_id, user_level = conversation.user_level, difficulty = conversation.difficulty, topic = conversation.topic)
 
             conversation_user_level = conversation.user_level
             conversation_difficulty = conversation.difficulty
             conversation_topic = conversation.topic
 
-        self._conversation_id = conversation_id
-        self._conversation_user_level = conversation_user_level
-        self._conversation_difficulty = conversation_difficulty
+        self._conversation_id = conversation._id
+        self._conversation_user_level = conversation.user_level
+        self._conversation_difficulty = conversation.difficulty
         self._conversation_topic = conversation_topic
+        self._is_activate = conversation.is_active
 
         # Checking if the parameters have been set,
         # otherwise, if the conversation is not found in the database, raise an error
@@ -99,7 +97,7 @@ class ConversationalChatBot(BaseChatBot):
         if self._conversation_difficulty is None:
             self._conversation_difficulty = "medium"
         if self._conversation_topic is None:
-            self._conversation_topic = "No specific topic has been set, so the conversation is open to any topic."
+            self._conversation_topic = "No specific topic has been set. The conversation is open to any topic."
 
         self._chat = None
         self._config = None
@@ -126,7 +124,7 @@ class ConversationalChatBot(BaseChatBot):
             ]
         )
 
-        _chat_with_history = prompt | self._chat_base # | self.content_mod_chain
+        _chat_with_history = prompt | self._chat_base
 
         self._chat = RunnableWithMessageHistory(
             _chat_with_history,
