@@ -1,41 +1,34 @@
-import time
-import struct
 import io
-
-from os import system, getenv
-
-import numpy as np
+import struct
+from os import getenv, system
 
 from dotenv import load_dotenv
-from google.cloud import speech
+from elevenlabs.client import ElevenLabs
 from flask import (
     Flask,
-    request,
-    jsonify,
     Response,
-    render_template,
-    redirect,
-    url_for,
+    jsonify,
     make_response,
+    redirect,
+    render_template,
+    request,
+    url_for,
 )
-from flask_socketio import SocketIO, send, emit
 from flask_cors import CORS
-from elevenlabs.client import ElevenLabs
-from pymongo import MongoClient
-
-from lib.llm import ConversationalChatBot, test_chatbot
-from lib.database import MongoDBConnector
+from flask_socketio import SocketIO, emit
+from lib.routes.logRoutes import register_log_routes
+from lib.routes.authRoutes import register_auth_routes
 from lib.audio import BufferHanlder
-from lib.auth import AuthenticationService, UserAuthenticationException
-from lib.log import Logger
-from lib.log import Log, LogType
+from lib.auth import AuthenticationService
+from lib.database import MongoDBConnector
+from lib.llm import ConversationalChatBot
+from lib.log import Logger, LogType
 
 load_dotenv()
 
 app = Flask(__name__)
 flask_ws = SocketIO(app, cors_allowed_origins="*")
 CORS(app, origins="*")
-speechClient = speech.SpeechClient()
 EL_client = ElevenLabs(api_key=getenv("ELEVENLABS_API_KEY"))
 app_db_connector = MongoDBConnector(
     getenv("MONGODB_URI")
@@ -46,30 +39,10 @@ logger = Logger(db)
 
 audio_buffer_handlers = {}
 
+register_auth_routes(app, user_auth)
+register_log_routes(app, db)
 
 # ROUTES
-
-
-@app.route("/", methods=["GET", "POST"])
-def hello_world():
-    if request.method == "POST":
-        # Access uploaded file
-        audio_file = request.files["audio_file"]
-        # Check if a file was uploaded
-        if audio_file:
-            # Process the uploaded file
-            audio_data = audio_file.stream.read()
-            recognized = run_quickstart(audio_data)
-            response = jsonify(recognized)
-            # response.headers.add("Access-Control-Allow-Origin", "*")
-            return response
-        else:
-            return "No file uploaded!"
-
-    with open("stt_chatbot_tts_integration.html", "r", encoding="utf-8") as f:
-        html_content = f.read()
-
-    return html_content
 
 
 @app.route("/text-to-speech", methods=["GET"])
@@ -81,51 +54,6 @@ def text_to_speech():
     return response
 
 
-@app.route("/logs", methods=["GET"])
-def show_all_logs():
-    return show_logs(log_type=None)
-
-
-@app.route("/logs/", methods=["GET"])
-def redirect_logs_slash():
-    return redirect(url_for("show_all_logs"))
-
-
-@app.route("/logs/<log_type>", methods=["GET"])
-def show_logs(log_type):
-    db = app_db_connector.connect("teachme_main")
-    logs_collection = db.get_collection("logs")
-    if log_type is None:
-        logs = logs_collection.retrieve_all()
-    else:
-        log_type = log_type.upper()
-        if log_type == "INFO":
-            logs = logs_collection.retrieve_by_log_type(LogType.INFO)
-        elif log_type == "ERROR":
-            logs = logs_collection.retrieve_by_log_type(LogType.ERROR)
-        else:
-            return redirect(url_for("show_all_logs"))
-    return render_template("logs_template.html", log_type=log_type, logs=logs)
-
-
-@app.route("/hello", methods=["GET"])
-def route_hello():
-    return Response(status=200, response="hello, world".encode("utf-8"))
-
-
-@app.route("/now", methods=["GET"])
-def route_now():
-    t_as_int = int(time.time())
-    return str(t_as_int)
-
-
-@app.route("/flush", methods=["GET"])
-def flush():
-    for k, v in audio_buffer_handlers.items():
-        v.save_audio_to_wav()
-        v.buffer.clear()
-    return "Ok"
-
 @app.route("/create-friendship", methods=["POST"])
 def create_friendship():
     data = request.get_json()
@@ -133,7 +61,11 @@ def create_friendship():
     student_email = data.get("student_email")
     # db = app_db_connector.connect("teachme_main")
     user_data_collection = db.get_collection("user_data")
-    user_data_collection.create_friendship_using_email(teacher_email=teacher_email, student_email=student_email) # TODO: add better error management
+    user_data_collection.create_friendship_using_email(
+        teacher_email=teacher_email, student_email=student_email
+    )  # TODO: add better error management
+    return "Ok"
+
 
 @app.route("/remove-friendship", methods=["POST"])
 def remove_friendship():
@@ -142,61 +74,21 @@ def remove_friendship():
     student_email = data.get("student_email")
     # db = app_db_connector.connect("teachme_main")
     user_data_collection = db.get_collection("user_data")
-    user_data_collection.remove_friendship_using_email(teacher_email=teacher_email, student_email=student_email) # TODO: add better error management
+    user_data_collection.remove_friendship_using_email(
+        teacher_email=teacher_email, student_email=student_email
+    )  # TODO: add better error management
 
-@app.route("/get-friends", methods=["GET"])
-def get_friends():
-    data = request.get_json()
-    user_email = data.get("user_email")
+
+@app.route("/get-friends/<user_email>", methods=["GET"])
+def get_friends(user_email: str):
+    # data = request.get_json()
+    # user_email = data.get("user_email")
     # db = app_db_connector.connect("teachme_main")
+    if user_email is None:
+        return make_response(400, "KO")
     user_data_collection = db.get_collection("user_data")
     user_friends = user_data_collection.get_user_friends(user_email=user_email)
     return jsonify(user_friends)
-
-
-# AUTHENTICATION
-
-
-@app.route("/register", methods=["POST"])
-def handle_sign_up():
-    try:
-        request_data = user_auth.validate_request_data(request, signup=True)
-        user = user_auth.register_user(**request_data)
-        response = make_response(redirect("/now", 302))
-        response.set_cookie(
-            key="uid", value=user._id, max_age=60 * 60 * 24 * 10
-        )  # TODO Figure this one out
-        return response
-    except UserAuthenticationException as ex:
-        print(ex)
-        return redirect("/", 400)
-
-
-@app.route("/login", methods=["POST"])
-def handle_sign_in():
-    try:
-        request_data = user_auth.validate_request_data(request, signup=False)
-        user = user_auth.get_user_by_email(request_data["email"])
-        response = make_response(redirect("/now", 302))
-        response.set_cookie(
-            key="uid", value=user._id, max_age=60 * 60 * 24 * 10
-        )  # TODO Figure this one out
-        return response
-    except UserAuthenticationException as ex:
-        print(ex)
-        return redirect("/", 400)
-
-
-@app.route("/me", methods=["GET"])
-def handle_is_logged_in():
-    # TODO Add Role differentiation
-    try:
-        uid = request.cookies["uid"]
-        print(uid)
-        user = user_auth.get_user_by_id(uid)
-        return jsonify({"user_id": user._id, "role": user.role})
-    except:
-        return make_response("KO", 401)
 
 
 # WEBSOCKET
@@ -225,61 +117,12 @@ def on_foo_event(data):
     print("FOO", data)
 
 
-@flask_ws.on("audio_data")
-def on_audio_data(data: bytes):
-    sid = request.sid
-    handler: BufferHanlder = audio_buffer_handlers[sid]
-    audio_data = data["data"]
-    is_speaking, was_speaking, max_sample, audio_bytes = handler.handle_audio_data(
-        audio_data
-    )
-    if not is_speaking and was_speaking:
-        print("STOPPED SPEAKING")
-        emit(
-            "speaking_status",
-            f"You stopped speaking (max_sample: {max_sample})",
-            to=sid,
-        )
-        response = run_quickstart(audio_bytes)
-    if is_speaking and not was_speaking:
-        print("STARTED SPEAKING")
-        emit(
-            "speaking_status",
-            f"You started speaking (max_sample: {max_sample})",
-            to=sid,
-        )
-
-
 @flask_ws.on("transcript_data")
 def on_transcript_data(data: str):
     print("\n\n\n\n\n\n", data, end="\n\n\n\n\n\n")
     response = get_chatbot_answer(data)
     print("Chatbot answer:", response)
     emit("chatbot_response", response)
-
-
-def get_user_transcript(
-    audio_stream: bytes,
-) -> speech.RecognizeResponse:  # TODO: DEPRECATED TO ADJUST WITH NEW LOGIC
-    audio_headers = load_audio(audio_stream)
-    print(audio_headers)
-    audio = speech.RecognitionAudio(content=audio_stream)
-    config = speech.RecognitionConfig(
-        encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,
-        audio_channel_count=audio_headers.get(
-            "channels"
-        ),  # 1 channel for raw, 2 channels for wav
-        sample_rate_hertz=audio_headers.get(
-            "sample_rate"
-        ),  # 16000 for raw, 44100 for wav
-        language_code="en-US",
-    )
-    response = speechClient.recognize(config=config, audio=audio)
-    if len(response.results) >= 1:
-        transcript: str = response.results[0].alternatives[0].transcript
-        return transcript
-    else:
-        return "Audio transcription failed"
 
 
 def get_chatbot_answer(prompt: str) -> str:
@@ -343,19 +186,11 @@ def load_audio(
     return return_dict
 
 
-def run_quickstart(audio_stream: bytes) -> speech.RecognizeResponse:
-    transcript = get_user_transcript(audio_stream)
-    print("User transcript:", transcript)
-    emit("transcript", {"user": transcript})
-    response = get_chatbot_answer(transcript)
-    print("Chatbot answer:", response)
-    emit("transcript", {"chatbot": response})
-
-
 if __name__ == "__main__":
+
     # user_auth.make_friends()
     # logger.log(Log(LogType.INFO, "Starting Flask app"))
-    #conv_dict = user_auth.create_conversation()
+    # conv_dict = user_auth.create_conversation()
     system("python3 -m flask --app main run --host=0.0.0.0 --port=5000 --debug")
     # test_chatbot(
     #     api_key=getenv("OPENAI_API_KEY"),

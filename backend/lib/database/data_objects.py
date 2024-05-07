@@ -3,6 +3,7 @@ from typing import Optional
 from datetime import datetime
 from ..log import LogType
 
+
 @dataclass
 class User:
     """
@@ -19,17 +20,12 @@ class User:
     ]  # ids: for students this is teachers and for teachers this is students
 
 
-# u1 = User(
-#     "jajajajaja", "john", "234567", "john.doe@example.com", "student", ["asiasdugias"]
-# )
-# print(u1.__dict__)
-
-
 @dataclass
 class Conversation:
     """
     Represents a conversation.
     """
+
     _id: any
     user_level: str
     difficulty: str
@@ -51,12 +47,13 @@ class ChatMessage:
     message: str
     timestamp: int
 
+
 @dataclass
 class Log:
     """
     Represents a log message.
     """
+
     log_type: LogType
     message: str
     time_stamp: datetime
-    
