@@ -8,5 +8,4 @@ protobuf
 python-dotenv
 google-cloud-speech
 pymongo
-flask-socketio
 flask-cors

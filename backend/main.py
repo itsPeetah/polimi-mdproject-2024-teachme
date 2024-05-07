@@ -9,16 +9,11 @@ from flask import (
     Response,
     jsonify,
     make_response,
-    redirect,
-    render_template,
     request,
-    url_for,
 )
 from flask_cors import CORS
-from flask_socketio import SocketIO, emit
 from lib.routes.logRoutes import register_log_routes
 from lib.routes.authRoutes import register_auth_routes
-from lib.audio import BufferHanlder
 from lib.auth import AuthenticationService
 from lib.database import MongoDBConnector
 from lib.llm import ConversationalChatBot, test_chatbot
@@ -27,7 +22,6 @@ from lib.log import Logger, LogType, Log
 load_dotenv()
 
 app = Flask(__name__)
-flask_ws = SocketIO(app, cors_allowed_origins="*")
 CORS(app, origins="*")
 EL_client = ElevenLabs(api_key=getenv("ELEVENLABS_API_KEY"))
 app_db_connector = MongoDBConnector(
@@ -94,7 +88,7 @@ def create_conversation():
         difficulty=difficulty,
         topic=topic,
         teacher_email=teacher_email,
-        student_email=student_email
+        student_email=student_email,
     )
     return "Ok"
 
@@ -104,7 +98,12 @@ def get_friends(user_email: str):
     # data = request.get_json()
     # user_email = data.get("user_email")
     # db = app_db_connector.connect("teachme_main")
-    logger.log(Log(LogType.INFO, f"Received GET request at /get-friends/ for user_email: {user_email}"))
+    logger.log(
+        Log(
+            LogType.INFO,
+            f"Received GET request at /get-friends/ for user_email: {user_email}",
+        )
+    )
     if user_email is None:
         return make_response(400, "KO")
     user_data_collection = db.get_collection("user_data")
@@ -112,46 +111,12 @@ def get_friends(user_email: str):
     return jsonify(user_friends)
 
 
-# WEBSOCKET
-
-
-@flask_ws.on("connect")
-def on_connected():
-    sid = request.sid
-    print("ws user connected", f"sid: {sid}")
-    audio_buffer_handlers[sid] = BufferHanlder(sid, 500)
-
-
-@flask_ws.on("disconnected connect")
-def on_connected():
-    sid = request.sid
-    print("ws user disconnected", f"sid: {sid}")
-
-
-@flask_ws.on("message")
-def on_message(message):
-    print("Received message:", message)
-
-
-@flask_ws.on("foo")
-def on_foo_event(data):
-    print("FOO", data)
-
-
-@flask_ws.on("transcript_data")
-def on_transcript_data(data: str):
-    print("\n\n\n\n\n\n", data, end="\n\n\n\n\n\n")
-    response = get_chatbot_answer(data)
-    print("Chatbot answer:", response)
-    emit("chatbot_response", response)
-
-
 def get_chatbot_answer(prompt: str) -> str:
     chatbot = ConversationalChatBot(
         api_key=getenv("OPENAI_API_KEY"),
         conversation_id=1,
         db_connector=app_db_connector,
-        logger=logger
+        logger=logger,
     )
     response = chatbot.send_message(prompt).content
     return response
