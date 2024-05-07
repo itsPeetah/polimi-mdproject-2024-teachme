@@ -107,7 +107,8 @@ class ConversationsCollection(Collection):
                             topic: str = None,
                             teacher_email: str = None,
                             student_email: str = None,
-                            is_active: bool = True,):
+                            is_active: bool = True,
+                            time_limit: int = 5):
         """
         Creates a new conversation in the database.
 
@@ -118,6 +119,7 @@ class ConversationsCollection(Collection):
             teacher_email (str, optional): Email of the teacher who created the conversation. Defaults to None.
             student_email (str, optional): Email of the student whom the conversation was created for. Defaults to None.
             is_active (bool, optional): Whether the conversation is currently active or not. Defaults to True.
+            time_limit (int, optional): Time limit for the conversation expressed in minutes. Defaults to 5.
 
         Returns:
             dict: A dictionary containing the details of the created conversation, including the assigned ID (_id) and all other attributes of the Conversation object.
@@ -130,6 +132,7 @@ class ConversationsCollection(Collection):
             "teacher_email": teacher_email,
             "student_email": student_email,
             "is_active": is_active,
+            "time_limit": time_limit,
         }
         result = self._collection.insert_one(conversation_dict)
 
@@ -176,7 +179,7 @@ class UserDataCollection(Collection):
             raise ValueError(f"Teacher with email '{teacher_email}' not found")
         if not student:
             raise ValueError(f"Student with email '{student_email}' not found")
-        
+
         existing_friendship = self._collection.find_one({"$or": [{"email": student_email, "friends": teacher_email}, {"email": teacher_email, "friends": student_email}]})
         if existing_friendship:
             print(f"Friendship between {teacher.email} and {student.email} already exists.")
@@ -212,7 +215,7 @@ class UserDataCollection(Collection):
         if not student:
             raise ValueError(f"Student with id '{student_id}' not found")
         
-        self.create_friendship(teacher.email, student.email)
+        self.create_friendship_using_email(teacher.email, student.email)
 
     def remove_friendship_using_email(self, teacher_email: str, student_email: str):
         """
@@ -265,7 +268,7 @@ class UserDataCollection(Collection):
         
         self.remove_friendship_using_email(teacher.email, student.email)
     
-    def get_user_friends(self, user_email: str) -> List[User]:
+    def get_user_friends(self, user_email: str) -> list[str]:
         """
         Returns all the friends of the user.
         If the user is a teacher, this method returns all the teacher's students.
@@ -279,13 +282,15 @@ class UserDataCollection(Collection):
         if not user:
             raise ValueError(f"User with email {user_email} not found")
         
-        friends_cursor = self._collection.find({"email": {"$in": user.friends}})
-        friends = []
-        for friend in friends_cursor:
-            user = self.retrieve_by_email(friend)
-            if user:
-                friends.append(user)
-        return friends
+        # friends_cursor = self._collection.find({"email": {"$in": user.friends}})
+        # print(friends_cursor)
+        # print(f"User friends: {user.friends}")
+        # friends = []
+        # for friend in friends_cursor:
+        #     user = self.retrieve_by_email(friend)
+        #     if user:
+        #         friends.append(user)
+        return user.friends
         
     def retrieve_by_id(self, user_id: str) -> Optional[User]:
         user = self._collection.find_one({"_id": user_id})
