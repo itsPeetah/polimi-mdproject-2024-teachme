@@ -25,6 +25,8 @@ def register_log_routes(app: Flask, db: MongoDB):
                 logs = logs_collection.retrieve_by_log_type(LogType.INFO)
             elif log_type == "ERROR":
                 logs = logs_collection.retrieve_by_log_type(LogType.ERROR)
+            elif log_type == "CHATBOT":
+                logs = logs_collection.retrieve_by_log_type(LogType.CHATBOT)
             else:
                 return redirect(url_for("show_all_logs"))
         return render_template("logs_template.html", log_type=log_type, logs=logs)

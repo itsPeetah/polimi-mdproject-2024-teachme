@@ -11,6 +11,7 @@ from langchain_mongodb.chat_message_histories import MongoDBChatMessageHistory
 
 from .PROMPTS import get_prompt
 from ..database import Connector, MongoDBConnector, Conversation
+from ..log import LogType, Log, Logger
 
 
 class BaseChatBot:
@@ -28,9 +29,11 @@ class BaseChatBot:
         model: BaseChatModel = ChatOpenAI,
         model_version: str = "gpt-3.5-turbo",
         temperature: float = 0.2,
+        logger: Logger = None,
     ):
         self.api_key = api_key
         self.temperature = temperature
+        self.logger = logger
 
         self._chat_base = model(
             model=model_version,
@@ -38,22 +41,31 @@ class BaseChatBot:
             temperature=temperature,
         )
 
+    def log(self, message: str):
+        """Logs a message using the logger if available, otherwise prints it to the console.
+
+        :param message: The message to log.
+        :type message: str
+        """
+        if self.logger is not None:
+            self.logger.log(Log(LogType.CHATBOT, message))
+        else:
+            print(f"CHATBOT - {message}")
+
 
 class ConversationalChatBot(BaseChatBot):
     def __init__(
         self,
         api_key: str,
         conversation_id: str,
-        conversation_user_level: str = None,
-        conversation_difficulty: str = None,
-        conversation_topic: str = None,
         model: BaseChatModel = ChatOpenAI,
         model_version: str = "gpt-3.5-turbo",
         temperature: float = 0.2,
         db_connector: Connector = None,
         db_name: str = "teachme_main",
+        logger: Logger = None,
     ):
-        super().__init__(api_key, model, model_version, temperature)
+        super().__init__(api_key, model, model_version, temperature, logger)
 
         self._db_connector = db_connector
         self._db_name = db_name
@@ -65,27 +77,17 @@ class ConversationalChatBot(BaseChatBot):
             conversations = db.get_collection("conversations")
             conversation = conversations.find_by_id(conversation_id)
             if conversation is None:
-                print("Conversation not found in the database. Creating a new one...")
-                # TODO: check the conversation creation logic.
-                # This shouldn't be the correct place to do this stuff...
-                conversation = conversations.create_conversation(
-                    user_level = conversation_user_level,
-                    difficulty = conversation_difficulty,
-                    topic = conversation_topic,
-                    teacher_email = None,
-                    student_email = None,
-                    is_active = True,
+                self.log(f"""This error has been raised by the {self.__class__.__name__} class.
+                         The conversation with ID {conversation_id} was not found in the database, meaning that it has not been created yet."""
                 )
-
-            conversation_user_level = conversation.user_level
-            conversation_difficulty = conversation.difficulty
-            conversation_topic = conversation.topic
+                
+                raise ValueError("The conversation with the given ID was not found in the database.")
 
         self._conversation_id = conversation._id
         self._conversation_user_level = conversation.user_level
         self._conversation_difficulty = conversation.difficulty
-        self._conversation_topic = conversation_topic
-        self._is_activate = conversation.is_active
+        self._conversation_topic = conversation.topic
+        self._is_active = conversation.is_active
 
         # Checking if the parameters have been set,
         # otherwise, if the conversation is not found in the database, raise an error
@@ -165,15 +167,13 @@ class ConversationalChatBot(BaseChatBot):
     def conversation_id(self) -> int:
         return self._conversation_id
 
-def test_chatbot(api_key: str, conversation_id: int, conversation_user_level: str, conversation_difficulty: str, conversation_topic: str, db_connector: Connector, db_name: str):
+def test_chatbot(api_key: str, conversation_id: int, db_connector: Connector, db_name: str, logger: Logger = None):
     chatbot = ConversationalChatBot(
         api_key=api_key,
         conversation_id=conversation_id,
-        conversation_user_level=conversation_user_level,
-        conversation_difficulty=conversation_difficulty,
-        conversation_topic=conversation_topic,
         db_connector=db_connector,
         db_name=db_name,
+        logger=logger
     )
     while True:
         bot_answer = chatbot.send_message(

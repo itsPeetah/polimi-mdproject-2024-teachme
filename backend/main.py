@@ -21,7 +21,7 @@ from lib.routes.authRoutes import register_auth_routes
 from lib.audio import BufferHanlder
 from lib.auth import AuthenticationService
 from lib.database import MongoDBConnector
-from lib.llm import ConversationalChatBot
+from lib.llm import ConversationalChatBot, test_chatbot
 from lib.log import Logger, LogType, Log
 
 load_dotenv()
@@ -150,10 +150,8 @@ def get_chatbot_answer(prompt: str) -> str:
     chatbot = ConversationalChatBot(
         api_key=getenv("OPENAI_API_KEY"),
         conversation_id=1,
-        conversation_user_level="intermediate",
-        conversation_difficulty="medium",
-        conversation_topic="Discussing the weather",
         db_connector=app_db_connector,
+        logger=logger
     )
     response = chatbot.send_message(prompt).content
     return response
@@ -215,10 +213,8 @@ if __name__ == "__main__":
     system("python3 -m flask --app main run --host=0.0.0.0 --port=5000 --debug")
     # test_chatbot(
     #     api_key=getenv("OPENAI_API_KEY"),
-    #     conversation_id=2123,
-    #     conversation_user_level="intermediate",
-    #     conversation_difficulty="medium",
-    #     conversation_topic="The conversation topic is left free.",
+    #     conversation_id="6639ea3410a08c3689597981",
     #     db_connector=app_db_connector,
     #     db_name="teachme_main",
+    #     logger = logger
     # )

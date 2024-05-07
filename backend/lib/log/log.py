@@ -4,6 +4,7 @@ from enum import Enum
 class LogType(Enum):
     INFO = "INFO"
     ERROR = "ERROR"
+    CHATBOT = "CHATBOT"
 
 class Log():
     def __init__(self, log_type: LogType, message: str):
