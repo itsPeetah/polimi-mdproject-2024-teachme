@@ -22,7 +22,7 @@ from lib.audio import BufferHanlder
 from lib.auth import AuthenticationService
 from lib.database import MongoDBConnector
 from lib.llm import ConversationalChatBot
-from lib.log import Logger, LogType
+from lib.log import Logger, LogType, Log
 
 load_dotenv()
 
@@ -77,6 +77,26 @@ def remove_friendship():
     user_data_collection.remove_friendship_using_email(
         teacher_email=teacher_email, student_email=student_email
     )  # TODO: add better error management
+    return "Ok"
+
+
+@app.route("/create-conversation", methods=["POST"])
+def create_conversation():
+    data = request.get_json()
+    user_level = data.get("user_level")
+    difficulty = data.get("difficulty")
+    topic = data.get("topic")
+    teacher_email = data.get("teacher_email")
+    student_email = data.get("student_email")
+    conversations_collection = db.get_collection("conversations")
+    conversations_collection.create_conversation(
+        user_level=user_level,
+        difficulty=difficulty,
+        topic=topic,
+        teacher_email=teacher_email,
+        student_email=student_email
+    )
+    return "Ok"
 
 
 @app.route("/get-friends/<user_email>", methods=["GET"])
@@ -84,6 +104,7 @@ def get_friends(user_email: str):
     # data = request.get_json()
     # user_email = data.get("user_email")
     # db = app_db_connector.connect("teachme_main")
+    logger.log(Log(LogType.INFO, f"Received GET request at /get-friends/ for user_email: {user_email}"))
     if user_email is None:
         return make_response(400, "KO")
     user_data_collection = db.get_collection("user_data")

@@ -296,7 +296,7 @@ class UserDataCollection(Collection):
         
         self.remove_friendship_using_email(teacher.email, student.email)
     
-    def get_user_friends(self, user_email: str) -> List[User]:
+    def get_user_friends(self, user_email: str) -> list[str]:
         """
         Returns all the friends of the user.
         If the user is a teacher, this method returns all the teacher's students.
@@ -310,13 +310,15 @@ class UserDataCollection(Collection):
         if not user:
             raise ValueError(f"User with email {user_email} not found")
         
-        friends_cursor = self._collection.find({"email": {"$in": user.friends}})
-        friends = []
-        for friend in friends_cursor:
-            user = self.retrieve_by_email(friend)
-            if user:
-                friends.append(user)
-        return friends
+        # friends_cursor = self._collection.find({"email": {"$in": user.friends}})
+        # print(friends_cursor)
+        # print(f"User friends: {user.friends}")
+        # friends = []
+        # for friend in friends_cursor:
+        #     user = self.retrieve_by_email(friend)
+        #     if user:
+        #         friends.append(user)
+        return user.friends
         
     def retrieve_by_id(self, user_id: str) -> Optional[User]:
         user = self._collection.find_one({"_id": user_id})
