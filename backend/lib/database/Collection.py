@@ -6,6 +6,8 @@ Module containing classes for managing collections in the database.
 
 from datetime import datetime
 from typing import List, Optional
+from bson.objectid import ObjectId
+
 from ..log import LogType
 from .data_objects import Conversation, User
 
@@ -61,17 +63,17 @@ class ConversationsCollection(Collection):
         """
         super().__init__(collection, collection_name)
 
-    def find_by_id(self, conversation_id: int) -> Conversation:
+    def find_by_id(self, conversation_id: str) -> Conversation:
         """
         Find a conversation by its ID.
 
         :param conversation_id: ID of the conversation to find
-        :type conversation_id: int
+        :type conversation_id: str
         :return: the conversation object
         :rtype: Conversation
         """
         conversation_to_return = self._collection.find_one(
-            {"conversation_id": conversation_id}
+            {"_id": ObjectId(conversation_id)}
         )
         return (
             Conversation(**conversation_to_return)
@@ -104,16 +106,18 @@ class ConversationsCollection(Collection):
                             difficulty: str = None,
                             topic: str = None,
                             teacher_email: str = None,
-                            student_email: str = None):
+                            student_email: str = None,
+                            is_active: bool = True,):
         """
         Creates a new conversation in the database.
 
         Args:
-            user_level (str, optional): Level of the user.
-            difficulty (str, optional): Difficulty of the conversation.
-            topic (str, optional): Topic of the conversation.
-            teacher_email (str, optional): Email of the teacher who created the conversation.
-            student_email (str, optional): Email of the student whom the conversation was created for.
+            user_level (str, optional): Level of the user. Defaults to None.
+            difficulty (str, optional): Difficulty of the conversation. Defaults to None.
+            topic (str, optional): Topic of the conversation. Defaults to None.
+            teacher_email (str, optional): Email of the teacher who created the conversation. Defaults to None.
+            student_email (str, optional): Email of the student whom the conversation was created for. Defaults to None.
+            is_active (bool, optional): Whether the conversation is currently active or not. Defaults to True.
 
         Returns:
             dict: A dictionary containing the details of the created conversation, including the assigned ID (_id) and all other attributes of the Conversation object.
@@ -125,48 +129,13 @@ class ConversationsCollection(Collection):
             "topic": topic,
             "teacher_email": teacher_email,
             "student_email": student_email,
+            "is_active": is_active,
         }
         result = self._collection.insert_one(conversation_dict)
 
         conversation_dict["_id"] = result.inserted_id
 
-        return conversation_dict
-
-    def insert_one(
-        self,
-        conversation_id: int,
-        user_level: str = None,
-        difficulty: str = None,
-        topic: str = None,
-        teacher_email: str = None,
-        student_email: str = None
-    ):
-        """
-        Insert a new conversation into the collection.
-
-        :param conversation_id: ID of the conversation
-        :type conversation_id: int
-        :param user_level: level of the user, defaults to None
-        :type user_level: str, optional
-        :param difficulty: difficulty of the conversation, defaults to None
-        :type difficulty: str, optional
-        :param topic: topic of the conversation, defaults to None
-        :type topic: str, optional
-        :param teacher_email: email of the teacher who created the conversation, default to None
-        :type teacher_email: str, optional
-        :param student_email: email of the student whom the conversation was created for, default to None
-        :type student_email: str, optional
-        """
-        conversation = {
-            "conversation_id": conversation_id,
-            "user_level": user_level,
-            "difficulty": difficulty,
-            "topic": topic,
-            "teacher_email": teacher_email,
-            "student_email": student_email,
-        }
-        self._collection.insert_one(conversation)
-
+        return Conversation(**conversation_dict)
 
 class UserDataCollection(Collection):
     """
