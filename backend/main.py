@@ -12,6 +12,8 @@ from flask import (
     request,
 )
 from flask_cors import CORS
+from lib.routes.conversationRoutes import register_conversation_routes
+from lib.routes.userRoutes import register_user_routes
 from lib.routes.logRoutes import register_log_routes
 from lib.routes.authRoutes import register_auth_routes
 from lib.auth import AuthenticationService
@@ -33,72 +35,8 @@ logger = Logger(db)
 
 register_auth_routes(app, user_auth)
 register_log_routes(app, db)
-
-# ROUTES
-
-
-@app.route("/create-friendship", methods=["POST"])
-def create_friendship():
-    data = request.get_json()
-    teacher_email = data.get("teacher_email")
-    student_email = data.get("student_email")
-    # db = app_db_connector.connect("teachme_main")
-    user_data_collection = db.get_collection("user_data")
-    user_data_collection.create_friendship_using_email(
-        teacher_email=teacher_email, student_email=student_email
-    )  # TODO: add better error management
-    return "Ok"
-
-
-@app.route("/remove-friendship", methods=["POST"])
-def remove_friendship():
-    data = request.get_json()
-    teacher_email = data.get("teacher_email")
-    student_email = data.get("student_email")
-    # db = app_db_connector.connect("teachme_main")
-    user_data_collection = db.get_collection("user_data")
-    user_data_collection.remove_friendship_using_email(
-        teacher_email=teacher_email, student_email=student_email
-    )  # TODO: add better error management
-    return "Ok"
-
-
-@app.route("/create-conversation", methods=["POST"])
-def create_conversation():
-    data = request.get_json()
-    user_level = data.get("user_level")
-    difficulty = data.get("difficulty")
-    topic = data.get("topic")
-    teacher_email = data.get("teacher_email")
-    student_email = data.get("student_email")
-    conversations_collection = db.get_collection("conversations")
-    conversations_collection.create_conversation(
-        user_level=user_level,
-        difficulty=difficulty,
-        topic=topic,
-        teacher_email=teacher_email,
-        student_email=student_email,
-    )
-    return "Ok"
-
-
-@app.route("/get-friends/<user_email>", methods=["GET"])
-def get_friends(user_email: str):
-    # data = request.get_json()
-    # user_email = data.get("user_email")
-    # db = app_db_connector.connect("teachme_main")
-    logger.log(
-        Log(
-            LogType.INFO,
-            f"Received GET request at /get-friends/ for user_email: {user_email}",
-        )
-    )
-    if user_email is None:
-        return make_response(400, "KO")
-    user_data_collection = db.get_collection("user_data")
-    user_friends = user_data_collection.get_user_friends(user_email=user_email)
-    return jsonify(user_friends)
-
+register_user_routes(app, db, logger)
+register_conversation_routes(app, db)
 
 if __name__ == "__main__":
 
