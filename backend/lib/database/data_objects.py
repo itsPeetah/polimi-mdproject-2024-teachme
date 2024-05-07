@@ -33,6 +33,7 @@ class Conversation:
     teacher_email: str
     student_email: str
     is_active: bool
+    time_limit: int
 
 
 @dataclass
