@@ -2,8 +2,11 @@
 """
 
 import warnings
+import os
 
 from langchain_openai import ChatOpenAI
+from langchain_core.tools import tool
+from langchain.agents import create_openai_tools_agent, AgentExecutor
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain_core.language_models.chat_models import BaseChatModel
@@ -110,6 +113,19 @@ class ConversationalChatBot(BaseChatBot):
         self._config = None
 
         self.load_chat_history()
+    
+    def _create_end_conversation_tool(self):
+        @tool
+        def end_conversation():
+            """Greet the user and terminate the conversation."""
+            # TODO: Implement the end conversation logic, i.e., setting the conversation as inactive in the database.
+            # ...
+            
+            print("The user requested to end the conversation. Ending...")
+            self._is_active = False
+            self.logger.log(Log(LogType.CHATBOT, f"The conversation with ID {self._conversation_id} has ended."))
+            
+        return end_conversation
 
     def load_chat_history(self):
         """
@@ -128,13 +144,15 @@ class ConversationalChatBot(BaseChatBot):
                 ),
                 MessagesPlaceholder(variable_name="history"),
                 ("human", "{answer}"),
+                MessagesPlaceholder(variable_name="agent_scratchpad"),
             ]
         )
-
-        _chat_with_history = prompt | self._chat_base
+        tools = [self._create_end_conversation_tool()]
+        agent = create_openai_tools_agent(self._chat_base, tools, prompt)
+        agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=False)
 
         self._chat = RunnableWithMessageHistory(
-            _chat_with_history,
+            agent_executor,
             lambda session_id: MongoDBChatMessageHistory(
                 connection_string=self._db_connector.connection_string,
                 session_id=session_id,
@@ -142,10 +160,11 @@ class ConversationalChatBot(BaseChatBot):
                 collection_name="chat_message_history",
             ),
             input_messages_key="answer",
+            output_messages_key='output',
             history_messages_key="history",
         )
-        self._config = {"configurable": {"session_id": f"{self._conversation_id}"}}
-
+        self._config = {"configurable": {"session_id": f"{self._conversation_id}"}}        
+    
     def _get_message_history(self, session_id: int) -> str:
         if self._db_connector is None:
             warnings.warn("No database connection provided. Returning empty string.")
@@ -165,7 +184,8 @@ class ConversationalChatBot(BaseChatBot):
             {"answer": message},
             config=self._config,
         )
-
+        
+        # TODO: Together with the user response, return also the chatbot status (i.e. active or not active)
         return response
 
     @property
@@ -180,9 +200,9 @@ def test_chatbot(api_key: str, conversation_id: int, db_connector: Connector, db
         db_name=db_name,
         logger=logger
     )
-    while True:
+    while chatbot._is_active:
         bot_answer = chatbot.send_message(
             str(input("User message: "))
         )
-        print(f"Bot answer: {bot_answer.content}")
+        print(f"Bot answer: {bot_answer.get('output')}")
         
