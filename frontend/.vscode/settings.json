@@ -1,3 +1,4 @@
 {
-    "prettier.enable": true
+    "tailwind-fold.foldStyle": "QUOTES",
+    "tailwind-fold.foldedText": "Tailwind"
 }

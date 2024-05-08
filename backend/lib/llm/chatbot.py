@@ -167,19 +167,25 @@ class ConversationalChatBot(BaseChatBot):
     def conversation_id(self) -> int:
         return self._conversation_id
 
-def test_chatbot(api_key: str, conversation_id: int, conversation_user_level: str, conversation_difficulty: str, conversation_topic: str, db_connector: Connector, db_name: str):
+
+if __name__ == "__main__":
+    from dotenv import load_dotenv
+    import os
+    from database import MongoDBConnector, Connector, Conversation
+    from PROMPTS import get_prompt
+
+    load_dotenv()
+
     chatbot = ConversationalChatBot(
-        api_key=api_key,
-        conversation_id=conversation_id,
-        conversation_user_level=conversation_user_level,
-        conversation_difficulty=conversation_difficulty,
-        conversation_topic=conversation_topic,
-        db_connector=db_connector,
-        db_name=db_name,
+        api_key=os.getenv("OPENAI_API_KEY"),
+        conversation_id=3,
+        conversation_user_level="medium",
+        conversation_difficulty="beginner",
+        conversation_topic="The topic of the conversation is about the user's favorite hobbies.",
+        db_connector=MongoDBConnector(os.getenv("MONGODB_URI")),
     )
     while True:
         bot_answer = chatbot.send_message(
             str(input("User message: "))
         )
         print(f"Bot answer: {bot_answer.content}")
-        
