@@ -108,6 +108,7 @@ POST /remove-friendship
 - **topic (optional):** Topic of the conversation. Defaults to None.
 - **teacher_email (required):** Email address of the teacher who created the conversation.
 - **student_email (required):** Email address of the student whom the conversation was assigned to.
+- **time_limit (optional):** Time limit of the conversation (in minutes). Defaults to 5 minutes.
 
 **Expected data format (example):**
 ```json
@@ -118,7 +119,8 @@ POST /create-conversation
     "difficulty": "challenging",
     "topic": "Last summer holidays",
     "teacher_email": "teacher@example.com",
-    "student_email": "student@example.com"
+    "student_email": "student@example.com",
+    "time_limit": "10"
 }
 ```
 **Response:** The function returns the simple message "Ok" upon successful creation of the conversation.
