@@ -14,6 +14,7 @@ def register_conversation_routes(app: Flask, db: MongoDB):
         topic = data.get("topic")
         teacher_email = data.get("teacher_email")
         student_email = data.get("student_email")
+        time_limit = data.get("time_limit")
         conversations_collection = db.get_collection("conversations")
         conversations_collection.create_conversation(
             user_level=user_level,
@@ -21,5 +22,6 @@ def register_conversation_routes(app: Flask, db: MongoDB):
             topic=topic,
             teacher_email=teacher_email,
             student_email=student_email,
+            time_limit=time_limit
         )
         return "Ok"
