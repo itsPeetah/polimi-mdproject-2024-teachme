@@ -11,6 +11,7 @@ from lib.routes import *
 from lib.auth import AuthenticationService
 from lib.database import MongoDBConnector
 from lib.log import Logger
+from lib.llm import ChatbotManager
 
 # execution
 
@@ -24,11 +25,12 @@ app_db_connector = MongoDBConnector(
 db = app_db_connector.connect("teachme_main")
 user_auth = AuthenticationService(db)
 logger = Logger(db)
+chatbot_manager = ChatbotManager(5000)
 
 register_auth_routes(app, user_auth)
 register_log_routes(app, db)
 register_user_routes(app, db, logger)
-register_conversation_routes(app, db)
+register_conversation_routes(app, db, chatbot_manager)
 
 if __name__ == "__main__":
     system("python3 -m flask --app main run --debug")

@@ -6,11 +6,14 @@ from flask import Flask, request
 
 from lib.log import LogType, Logger, Log
 from lib.database import MongoDB
-from lib.llm import ConversationalChatBot
+from lib.llm import ConversationalChatBot, ChatbotManager
 
 active_conversations = {}
 
-def register_conversation_routes(app: Flask, db: MongoDB, logger: Logger = None):
+
+def register_conversation_routes(
+    app: Flask, db: MongoDB, cbm: ChatbotManager, logger: Logger = None
+):
 
     @app.route("/create-conversation", methods=["POST"])
     def create_conversation():
@@ -28,27 +31,29 @@ def register_conversation_routes(app: Flask, db: MongoDB, logger: Logger = None)
             topic=topic,
             teacher_email=teacher_email,
             student_email=student_email,
-            time_limit=time_limit
+            time_limit=time_limit,
         )
         return "Ok"
-    
+
     @app.route("/initialize-conversation", methods=["POST"])
     def initialize_conversation():
         data = request.get_json()
         conversation_id = data.get("conversation_id")
-        
+
         conversations_collection = db.get_collection("conversations")
-        
+
         try:
             conversation = conversations_collection.find_by_id(conversation_id)
         except InvalidId:
-            logger.log(Log(LogType.ERROR, f"Invalid conversation_id: {conversation_id}"))
+            logger.log(
+                Log(LogType.ERROR, f"Invalid conversation_id: {conversation_id}")
+            )
             return "Invalid conversation_id"
-        
+
         if conversation is None:
             logger.log(Log(LogType.ERROR, f"Conversation not found: {conversation_id}"))
             return "Conversation not found. You must create a conversation before initializing it."
-        
+
         # Initializing the Chatbot for the conversation if not already initialized
         if conversation_id not in active_conversations:
             active_conversations[conversation_id] = {
@@ -62,10 +67,11 @@ def register_conversation_routes(app: Flask, db: MongoDB, logger: Logger = None)
                 ),
             }
         else:
-            logger.log(Log(
-                log_type=LogType.INFO,
-                message=f"Conversation {conversation_id} already initialized",
+            logger.log(
+                Log(
+                    log_type=LogType.INFO,
+                    message=f"Conversation {conversation_id} already initialized",
                 )
             )
-        
+
         return "Ok"
