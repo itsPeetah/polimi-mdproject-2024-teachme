@@ -1,16 +1,19 @@
 """
 Module containing classes for connecting to MongoDB and managing the connection.
 """
+
 # pylint: disable=line-too-long
 
 from pymongo.mongo_client import MongoClient
 
 from .Database import MongoDB
 
-class Connector():
+
+class Connector:
     """
     Represents a generic connector for connecting to a database.
     """
+
     def __init__(self, key: str = None) -> None:
         """
         Initialize a Connector object.
@@ -19,19 +22,19 @@ class Connector():
         :type key: str, optional
         """
         pass
-    
+
     def connect(self):
         """
         Connect to the database.
         """
         pass
-    
+
     def close(self):
         """
         Close the database connection.
         """
         pass
-    
+
     @property
     def connection_string(self):
         """
@@ -39,10 +42,12 @@ class Connector():
         """
         pass
 
+
 class MongoDBConnector(Connector):
     """
     Represents a connector for connecting to a MongoDB database.
     """
+
     def __init__(self, key: str = None) -> None:
         """
         Initialize a MongoDBConnector object.
@@ -55,11 +60,11 @@ class MongoDBConnector(Connector):
         self._client = MongoClient(self._key)
 
         try:
-            self._client.admin.command('ping')
+            self._client.admin.command("ping")
         except Exception as exc:
-            raise ConnectionError(f'Connection to the DB failed\n{exc}') from exc
+            raise ConnectionError(f"Connection to the DB failed\n{exc}") from exc
 
-    def connect(self, db_name: str = 'teachme_main') -> MongoDB:
+    def connect(self, db_name: str = "teachme_main") -> MongoDB:
         """
         Connect to the MongoDB database.
 
@@ -68,7 +73,7 @@ class MongoDBConnector(Connector):
         :return: MongoDB object representing the connected database
         :rtype: MongoDB
         """
-        return MongoDB(self._client, db_name)
+        return MongoDB(self._client, db_name, connection_string=self._key)
 
     def close(self):
         self._client.close()
@@ -86,7 +91,7 @@ def main():
     import os
 
     dotenv.load_dotenv()
-    key = os.getenv('MONGODB_URI')
+    key = os.getenv("MONGODB_URI")
 
     connector = MongoDBConnector(key)
     print("Connected to the DB")
@@ -94,6 +99,7 @@ def main():
     print("Closing the connection")
     connector.close()
     print("Connection closed. Finishing...")
+
 
 if __name__ == "__main__":
     main()

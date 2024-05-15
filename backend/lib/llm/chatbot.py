@@ -13,7 +13,7 @@ from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_mongodb.chat_message_histories import MongoDBChatMessageHistory
 
 from .PROMPTS import get_prompt
-from ..database import Connector, MongoDBConnector, Conversation
+from ..database import Connector, MongoDBConnector, MongoDB, Conversation
 from ..log import LogType, Log, Logger
 
 
@@ -64,29 +64,28 @@ class ConversationalChatBot(BaseChatBot):
         model: BaseChatModel = ChatOpenAI,
         model_version: str = "gpt-3.5-turbo",
         temperature: float = 0.2,
-        db_connector: Connector = None,
-        db_name: str = "teachme_main",
+        db: MongoDB = None,
         idle_timeout: int = 300,  # in seconds | 300 seconds = 5 minutes
         logger: Logger = None,
     ):
         super().__init__(api_key, model, model_version, temperature, logger)
 
-        self._db_connector = db_connector
-        self._db_name = db_name
+        self._db = db
 
         # Check if the data already exists in the database collection
         # named 'conversations'
-        if self._db_connector is not None:
-            db = self._db_connector.connect(self._db_name)
+        if db is not None:
             conversations = db.get_collection("conversations")
             conversation = conversations.find_by_id(conversation_id)
             if conversation is None:
-                self.log(f"""This error has been raised by the {self.__class__.__name__} class.
+                self.log(
+                    f"""This error has been raised by the {self.__class__.__name__} class.
                          The conversation with ID {conversation_id} was not found in the database, meaning that it has not been created yet."""
-                         )
+                )
 
                 raise ValueError(
-                    "The conversation with the given ID was not found in the database.")
+                    "The conversation with the given ID was not found in the database."
+                )
 
         self._conversation_id = conversation._id
         self._conversation_user_level = conversation.user_level
@@ -111,9 +110,13 @@ class ConversationalChatBot(BaseChatBot):
             self._conversation_difficulty = "medium"
 
         if self._conversation_topic is None:
-            self._conversation_topic = "No specific topic has been set. The conversation is open to any topic."
+            self._conversation_topic = (
+                "No specific topic has been set. The conversation is open to any topic."
+            )
         else:
-            self._conversation_topic = f"The conversation topic is {self._conversation_topic}."
+            self._conversation_topic = (
+                f"The conversation topic is {self._conversation_topic}."
+            )
 
         self._chat = None
         self._config = None
@@ -127,8 +130,12 @@ class ConversationalChatBot(BaseChatBot):
 
             self._is_active = False
 
-            self.logger.log(Log(
-                LogType.CHATBOT, f"The conversation with ID {self._conversation_id} has ended."))
+            self.logger.log(
+                Log(
+                    LogType.CHATBOT,
+                    f"The conversation with ID {self._conversation_id} has ended.",
+                )
+            )
 
         return end_conversation
 
@@ -159,29 +166,27 @@ class ConversationalChatBot(BaseChatBot):
         self._chat = RunnableWithMessageHistory(
             agent_executor,
             lambda session_id: MongoDBChatMessageHistory(
-                connection_string=self._db_connector.connection_string,
+                connection_string=self._db.db_connection_string,
                 session_id=session_id,
-                database_name=self._db_name,
+                database_name=self._db.db_name,
                 collection_name="chat_message_history",
             ),
             input_messages_key="answer",
-            output_messages_key='output',
+            output_messages_key="output",
             history_messages_key="history",
         )
-        self._config = {"configurable": {
-            "session_id": f"{self._conversation_id}"}}
+        self._config = {"configurable": {"session_id": f"{self._conversation_id}"}}
 
     def _get_message_history(self, session_id: int) -> str:
-        if self._db_connector is None:
-            warnings.warn(
-                "No database connection provided. Returning empty string.")
+        if self._db is None:
+            warnings.warn("No database connection provided. Returning empty string.")
             return ""
 
         return (
             MongoDBChatMessageHistory(
-                connection_string=self._db_connector.connection_string,
+                connection_string=self._db.db_connection_string,
                 session_id=session_id,
-                database_name=self._db_name,
+                database_name=self._db.db_name,
                 collection_name="chat_message_history",
             ),
         )
@@ -197,8 +202,8 @@ class ConversationalChatBot(BaseChatBot):
         )
 
         chatbot_response = {
-            'output': response.get('output'),
-            'is_chatbot_active': self._is_active
+            "output": response.get("output"),
+            "is_chatbot_active": self._is_active,
         }
 
         return chatbot_response
@@ -219,8 +224,12 @@ class ConversationalChatBot(BaseChatBot):
         elapsed_time = time.time() - self._last_user_message_timestamp
 
         if elapsed_time > self._idle_timeout:
-            self.logger.log(Log(
-                LogType.CHATBOT, f"The conversation with ID {self._conversation_id} is idling. Elapsed time: {elapsed_time} seconds."))
+            self.logger.log(
+                Log(
+                    LogType.CHATBOT,
+                    f"The conversation with ID {self._conversation_id} is idling. Elapsed time: {elapsed_time} seconds.",
+                )
+            )
             self._is_active = False
             result = True
         else:
@@ -229,16 +238,20 @@ class ConversationalChatBot(BaseChatBot):
         return result
 
 
-def test_chatbot(api_key: str, conversation_id: int, db_connector: Connector, db_name: str, logger: Logger = None):
+def test_chatbot(
+    api_key: str,
+    conversation_id: int,
+    db_connector: Connector,
+    db_name: str,
+    logger: Logger = None,
+):
     chatbot = ConversationalChatBot(
         api_key=api_key,
         conversation_id=conversation_id,
         db_connector=db_connector,
         db_name=db_name,
-        logger=logger
+        logger=logger,
     )
     while chatbot._is_active:
-        bot_answer = chatbot.send_message(
-            str(input("User message: "))
-        )
+        bot_answer = chatbot.send_message(str(input("User message: ")))
         print(f"Bot answer: {bot_answer.get('output')}")

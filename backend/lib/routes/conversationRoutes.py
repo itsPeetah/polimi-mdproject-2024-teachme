@@ -1,8 +1,6 @@
 import os
 
-from bson.errors import InvalidId
-
-from flask import Flask, request
+from flask import Flask, request, jsonify, make_response
 
 from lib.log import LogType, Logger, Log
 from lib.database import MongoDB
@@ -25,7 +23,7 @@ def register_conversation_routes(
         student_email = data.get("student_email")
         time_limit = data.get("time_limit")
         conversations_collection = db.get_collection("conversations")
-        conversations_collection.create_conversation(
+        conv = conversations_collection.create_conversation(
             user_level=user_level,
             difficulty=difficulty,
             topic=topic,
@@ -33,45 +31,23 @@ def register_conversation_routes(
             student_email=student_email,
             time_limit=time_limit,
         )
-        return "Ok"
+
+        return jsonify({"conversation_id": str(conv._id)})
 
     @app.route("/initialize-conversation", methods=["POST"])
     def initialize_conversation():
         data = request.get_json()
         conversation_id = data.get("conversation_id")
 
-        conversations_collection = db.get_collection("conversations")
+        (status_code, response) = cbm.init_chatbot(conversation_id, db, logger)
 
-        try:
-            conversation = conversations_collection.find_by_id(conversation_id)
-        except InvalidId:
-            logger.log(
-                Log(LogType.ERROR, f"Invalid conversation_id: {conversation_id}")
-            )
-            return "Invalid conversation_id"
+        return make_response(response, status_code)
 
-        if conversation is None:
-            logger.log(Log(LogType.ERROR, f"Conversation not found: {conversation_id}"))
-            return "Conversation not found. You must create a conversation before initializing it."
+    @app.route("/user-chat-message", methods=["POST"])
+    def user_chat_message():
+        data = request.get_json()
+        conversation_id = data.get("conversation_id")
 
-        # Initializing the Chatbot for the conversation if not already initialized
-        if conversation_id not in active_conversations:
-            active_conversations[conversation_id] = {
-                "conversation": conversation,
-                "chatbot": ConversationalChatBot(
-                    api_key=os.getenv("OPENAI_API_KEY"),
-                    conversation_id=conversation_id,
-                    db_connector=db,
-                    db_name="teachme_main",
-                    logger=logger,
-                ),
-            }
-        else:
-            logger.log(
-                Log(
-                    log_type=LogType.INFO,
-                    message=f"Conversation {conversation_id} already initialized",
-                )
-            )
-
-        return "Ok"
+    @app.route("/foochatbot", methods=["GET"])
+    def foo():
+        return make_response(str(len(cbm.chatbots)), 200)
