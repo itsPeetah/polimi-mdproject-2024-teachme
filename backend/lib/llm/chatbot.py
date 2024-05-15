@@ -91,6 +91,9 @@ class ConversationalChatBot(BaseChatBot):
         self._conversation_user_level = conversation.user_level
         self._conversation_difficulty = conversation.difficulty
         self._conversation_topic = conversation.topic
+
+        # TODO: modify the is_active property in the conversation. _is_active should be passed to the object creation.
+        #       The conversation object now should store and attribute called is_ended
         self._is_active = conversation.is_active
 
         # Attribute to check the timestamp of the last message sent by the user
@@ -175,11 +178,13 @@ class ConversationalChatBot(BaseChatBot):
             output_messages_key="output",
             history_messages_key="history",
         )
-        self._config = {"configurable": {"session_id": f"{self._conversation_id}"}}
+        self._config = {"configurable": {
+            "session_id": f"{self._conversation_id}"}}
 
     def _get_message_history(self, session_id: int) -> str:
         if self._db is None:
-            warnings.warn("No database connection provided. Returning empty string.")
+            warnings.warn(
+                "No database connection provided. Returning empty string.")
             return ""
 
         return (
@@ -207,6 +212,10 @@ class ConversationalChatBot(BaseChatBot):
         }
 
         return chatbot_response
+
+    def deactivate(self):
+        """Deactivates the chatbot."""
+        self._is_active = False
 
     @property
     def conversation_id(self) -> int:

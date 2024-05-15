@@ -64,12 +64,12 @@ class ChatbotManager:
         return 200, "Conversation initialized successfully"
 
     def check_idle(self):
+        """Check if the chatbots are idle and, if so, deactivate them."""
         with self.dict_lock:
             for cid, chatbot in self.chatbots.items():
-                # if not chatbot.isActive or chatbot.is_idle:
-                # chatbot.turn_off()
-                # del self.chatbots[cid]
-                pass
+                if chatbot.is_idle:
+                    chatbot.deactivate()
+                    del self.chatbots[cid]
 
     def get_chatbot(self, cid):
         with self.dict_lock:
