@@ -24,7 +24,7 @@ def register_auth_routes(app: Flask, user_auth: AuthenticationService):
         try:
             request_data = user_auth.validate_request_data(request, signup=False)
             user = user_auth.get_user_by_email(request_data["email"])
-            response = jsonify({"uid": user._id})
+            response = jsonify({"uid": user._id, "role": user.role})
             response.set_cookie(key="uid", value=user._id, max_age=60 * 60 * 24 * 10)
             return response
         except UserAuthenticationException as ex:
