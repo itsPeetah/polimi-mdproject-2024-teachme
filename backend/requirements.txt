@@ -1,4 +1,5 @@
 Flask
+langchain
 langchain_community
 langchain_core
 langchain_mongodb
