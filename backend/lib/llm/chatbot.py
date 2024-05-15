@@ -2,7 +2,7 @@
 """
 
 import warnings
-import os
+import time
 
 from langchain_openai import ChatOpenAI
 from langchain_core.tools import tool
@@ -66,6 +66,7 @@ class ConversationalChatBot(BaseChatBot):
         temperature: float = 0.2,
         db_connector: Connector = None,
         db_name: str = "teachme_main",
+        idle_timeout: int = 300,  # in seconds | 300 seconds = 5 minutes
         logger: Logger = None,
     ):
         super().__init__(api_key, model, model_version, temperature, logger)
@@ -82,15 +83,20 @@ class ConversationalChatBot(BaseChatBot):
             if conversation is None:
                 self.log(f"""This error has been raised by the {self.__class__.__name__} class.
                          The conversation with ID {conversation_id} was not found in the database, meaning that it has not been created yet."""
-                )
-                
-                raise ValueError("The conversation with the given ID was not found in the database.")
+                         )
+
+                raise ValueError(
+                    "The conversation with the given ID was not found in the database.")
 
         self._conversation_id = conversation._id
         self._conversation_user_level = conversation.user_level
         self._conversation_difficulty = conversation.difficulty
         self._conversation_topic = conversation.topic
         self._is_active = conversation.is_active
+
+        # Attribute to check the timestamp of the last message sent by the user
+        self._last_user_message_timestamp = time.time()
+        self._idle_timeout = idle_timeout
 
         # Checking if the parameters have been set,
         # otherwise, if the conversation is not found in the database, raise an error
@@ -113,18 +119,17 @@ class ConversationalChatBot(BaseChatBot):
         self._config = None
 
         self.load_chat_history()
-    
+
     def _create_end_conversation_tool(self):
         @tool
         def end_conversation():
             """Greet the user and terminate the conversation."""
-            # TODO: Implement the end conversation logic, i.e., setting the conversation as inactive in the database.
-            # ...
-            
-            print("The user requested to end the conversation. Ending...")
+
             self._is_active = False
-            self.logger.log(Log(LogType.CHATBOT, f"The conversation with ID {self._conversation_id} has ended."))
-            
+
+            self.logger.log(Log(
+                LogType.CHATBOT, f"The conversation with ID {self._conversation_id} has ended."))
+
         return end_conversation
 
     def load_chat_history(self):
@@ -163,11 +168,13 @@ class ConversationalChatBot(BaseChatBot):
             output_messages_key='output',
             history_messages_key="history",
         )
-        self._config = {"configurable": {"session_id": f"{self._conversation_id}"}}        
-    
+        self._config = {"configurable": {
+            "session_id": f"{self._conversation_id}"}}
+
     def _get_message_history(self, session_id: int) -> str:
         if self._db_connector is None:
-            warnings.warn("No database connection provided. Returning empty string.")
+            warnings.warn(
+                "No database connection provided. Returning empty string.")
             return ""
 
         return (
@@ -180,17 +187,47 @@ class ConversationalChatBot(BaseChatBot):
         )
 
     def send_message(self, message: str) -> str:
+        # Reset the timestamp of the last user message
+        self._last_user_message_timestamp = time.time()
+
+        # Invoke the chat model with the user message
         response = self._chat.invoke(
             {"answer": message},
             config=self._config,
         )
-        
-        # TODO: Together with the user response, return also the chatbot status (i.e. active or not active)
-        return response
+
+        chatbot_response = {
+            'output': response.get('output'),
+            'is_chatbot_active': self._is_active
+        }
+
+        return chatbot_response
 
     @property
     def conversation_id(self) -> int:
         return self._conversation_id
+
+    @property
+    def is_idle(self):
+        """Returns True if the chatbot is idle, False otherwise.
+
+        The idle state is determined by the time elapsed since the last user message.
+
+        :return: True if the chatbot is idle, False otherwise.
+        :rtype: bool
+        """
+        elapsed_time = time.time() - self._last_user_message_timestamp
+
+        if elapsed_time > self._idle_timeout:
+            self.logger.log(Log(
+                LogType.CHATBOT, f"The conversation with ID {self._conversation_id} is idling. Elapsed time: {elapsed_time} seconds."))
+            self._is_active = False
+            result = True
+        else:
+            result = False
+
+        return result
+
 
 def test_chatbot(api_key: str, conversation_id: int, db_connector: Connector, db_name: str, logger: Logger = None):
     chatbot = ConversationalChatBot(
@@ -205,4 +242,3 @@ def test_chatbot(api_key: str, conversation_id: int, db_connector: Connector, db
             str(input("User message: "))
         )
         print(f"Bot answer: {bot_answer.get('output')}")
-        
