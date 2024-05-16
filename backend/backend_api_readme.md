@@ -105,7 +105,7 @@ POST /remove-friendship
 **Request parameters:**
 - **user_level (required, string):** Level of the user. Possible values: *beginner*, *intermediate*, *advanced*.
 - **difficulty (required, string):** Difficulty of the conversation. Possible values: *easy*, *medium*, *challenging*.
-- **topic (optional):** Topic of the conversation. Defaults to None.
+- **topic (optional, string):** Topic of the conversation. Defaults to None.
 - **teacher_email (required, string):** Email address of the teacher who created the conversation.
 - **student_email (required, string):** Email address of the student whom the conversation was assigned to.
 - **time_limit (optional, string or int):** Time limit of the conversation (in minutes). Defaults to 5 minutes.
