@@ -32,7 +32,7 @@ class Conversation:
     topic: str
     teacher_email: str
     student_email: str
-    is_active: bool
+    is_ended: bool
     time_limit: int
 
 
