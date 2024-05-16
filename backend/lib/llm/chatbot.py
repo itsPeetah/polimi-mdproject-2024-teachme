@@ -92,9 +92,8 @@ class ConversationalChatBot(BaseChatBot):
         self._conversation_difficulty = conversation.difficulty
         self._conversation_topic = conversation.topic
 
-        # TODO: modify the is_active property in the conversation. _is_active should be passed to the object creation.
-        #       The conversation object now should store and attribute called is_ended
-        self._is_active = conversation.is_active
+        # The chatbot should be active if the conversation is not ended yet.
+        self._is_active = not conversation.is_ended
 
         # Attribute to check the timestamp of the last message sent by the user
         self._last_user_message_timestamp = time.time()

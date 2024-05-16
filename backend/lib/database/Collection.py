@@ -51,6 +51,8 @@ class ConversationsCollection(Collection):
     - topic: str
     - teacher_email: str
     - student_email: str
+    - time_limit: int
+    - is_ended: bool
     """
 
     def __init__(self, collection, collection_name: str) -> None:
@@ -109,7 +111,7 @@ class ConversationsCollection(Collection):
                             topic: str = None,
                             teacher_email: str = None,
                             student_email: str = None,
-                            is_active: bool = True,
+                            is_ended: bool = False,
                             time_limit: int = 5):
         """
         Creates a new conversation in the database.
@@ -120,7 +122,7 @@ class ConversationsCollection(Collection):
             topic (str, optional): Topic of the conversation. Defaults to None.
             teacher_email (str, optional): Email of the teacher who created the conversation. Defaults to None.
             student_email (str, optional): Email of the student whom the conversation was created for. Defaults to None.
-            is_active (bool, optional): Whether the conversation is currently active or not. Defaults to True.
+            is_ended (bool, optional): Whether the conversation is currently ended or not. Defaults to False.
             time_limit (int, optional): Time limit for the conversation expressed in minutes. Defaults to 5.
 
         Returns:
@@ -133,7 +135,7 @@ class ConversationsCollection(Collection):
             "topic": topic,
             "teacher_email": teacher_email,
             "student_email": student_email,
-            "is_active": is_active,
+            "is_ended": is_ended,
             "time_limit": time_limit,
         }
         result = self._collection.insert_one(conversation_dict)
@@ -144,18 +146,14 @@ class ConversationsCollection(Collection):
 
     def end_conversation(self, conversation_id: str):
         """
-        Ends a conversation by setting the is_active attribute to False.
+        Ends a conversation by setting the is_ended attribute to True.
 
         Args:
             conversation_id (str): ID of the conversation to end.
         """
-        conversation = self.find_by_id(conversation_id)
-        if conversation is not None:
-            conversation.is_active = False
-            self._collection.update_one(
-                {"_id": ObjectId(conversation_id)}, {
-                    "$set": {"is_active": False}}
-            )
+        self._collection.update_one(
+            {"_id": ObjectId(conversation_id)}, {"$set": {"is_ended": True}}
+        )
 
 
 class UserDataCollection(Collection):
