@@ -63,7 +63,7 @@ class ChatbotManager:
 
         return 200, "Conversation initialized successfully"
 
-    def check_idle(self):
+    def check_idle(self) -> None:
         """Check if the chatbots are idle and, if so, deactivate them."""
         with self.dict_lock:
             for cid, chatbot in self.chatbots.items():
@@ -71,10 +71,17 @@ class ChatbotManager:
                     chatbot.deactivate()
                     del self.chatbots[cid]
 
-    def get_chatbot(self, cid):
+    def get_chatbot(self, cid: str) -> ConversationalChatBot:
         with self.dict_lock:
             return self.chatbots.get(cid, None)
 
-    def add_chatbot(self, cid: str, chatbot: ConversationalChatBot):
+    def add_chatbot(self, cid: str, chatbot: ConversationalChatBot) -> None:
         with self.dict_lock:
             self.chatbots[cid] = chatbot
+
+    def send_message_to_chatbot(self, cid: str, message: str):
+        chatbot = self.get_chatbot(cid)
+        response = chatbot.send_message(message) # TODO: we might need to create a thread for this
+        response_message = response["output"]
+        return response_message
+

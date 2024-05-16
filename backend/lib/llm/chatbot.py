@@ -223,7 +223,8 @@ class ConversationalChatBot(BaseChatBot):
 
     @property
     def is_idle(self):
-        """Returns True if the chatbot is idle, False otherwise.
+        """
+        Returns True if the chatbot is idle, False otherwise.
 
         The idle state is determined by the time elapsed since the last user message.
 

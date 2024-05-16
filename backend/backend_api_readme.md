@@ -5,10 +5,10 @@
 **Methods:** `POST`  
 **Description:** Registers a new user in the system.   
 **Request parameters:**
-- **email (required):** email address of the user.
-- **username (required):** username of the user.
-- **password (required):** password of the user.
-- **role (required):** role of the user. Possible values: *teacher*, *student*.
+- **email (required, string):** email address of the user.
+- **username (required, string):** username of the user.
+- **password (required, string):** password of the user.
+- **role (required, string):** role of the user. Possible values: *teacher*, *student*.
 
 **Expected data format (example):**  
 ```json
@@ -30,8 +30,8 @@ POST /register
 **Methods:** `POST`  
 **Description:** Logs user into the system.   
 **Request parameters:**
-- **email (required):** email address of the user.
-- **password (required):** password of the user.
+- **email (required, string):** email address of the user.
+- **password (required, string):** password of the user.
 
 **Expected data format (example):**  
 ```json
@@ -63,8 +63,8 @@ POST /login
 **Methods:** `POST`  
 **Description:** Creates a *friendship* between a teacher and a student in the database.  
 **Request parameters:**
-- **teacher_email (required):** email address of the teacher.
-- **student_email (required):** email address of the student.
+- **teacher_email (required, string):** email address of the teacher.
+- **student_email (required, string):** email address of the student.
 
 **Expected data format (example):**  
 ```json
@@ -83,8 +83,8 @@ POST /create-friendship
 **Methods:** `POST`  
 **Description:** Removes the *friendship* between a teacher and a student in the database.  
 **Request parameters:**
-- **teacher_email (required):** email address of the teacher.
-- **student_email (required):** email address of the student.
+- **teacher_email (required, string):** email address of the teacher.
+- **student_email (required, string):** email address of the student.
 
 **Expected data format (example):**
 ```json
@@ -103,12 +103,12 @@ POST /remove-friendship
 **Methods:** `POST`  
 **Description:** Creates a new conversation in the database.  
 **Request parameters:**
-- **user_level (required):** Level of the user. Possible values: *beginner*, *intermediate*, *advanced*.
-- **difficulty (required):** Difficulty of the conversation. Possible values: *easy*, *medium*, *challenging*.
+- **user_level (required, string):** Level of the user. Possible values: *beginner*, *intermediate*, *advanced*.
+- **difficulty (required, string):** Difficulty of the conversation. Possible values: *easy*, *medium*, *challenging*.
 - **topic (optional):** Topic of the conversation. Defaults to None.
-- **teacher_email (required):** Email address of the teacher who created the conversation.
-- **student_email (required):** Email address of the student whom the conversation was assigned to.
-- **time_limit (optional):** Time limit of the conversation (in minutes). Defaults to 5 minutes.
+- **teacher_email (required, string):** Email address of the teacher who created the conversation.
+- **student_email (required, string):** Email address of the student whom the conversation was assigned to.
+- **time_limit (optional, string or int):** Time limit of the conversation (in minutes). Defaults to 5 minutes.
 
 **Expected data format (example):**
 ```json
@@ -120,10 +120,52 @@ POST /create-conversation
     "topic": "Last summer holidays",
     "teacher_email": "teacher@example.com",
     "student_email": "student@example.com",
-    "time_limit": "10"
+    "time_limit": 10
 }
 ```
 **Response:** The function returns the simple message "Ok" upon successful creation of the conversation.
+
+
+## Initialize conversation
+**Route:** `/initialize-conversation`  
+**Methods:** `POST`  
+**Description:** Initializes an already existing conversation. This is necessary in order to load the corresponding chatbot from the conversation in the database.  
+**Request parameters:**
+- **conversation_id (required, string)**: The unique identifier of the conversation.
+
+**Expected data format (example):**
+```json
+POST /initialize-conversation
+
+{
+    "conversation_id": "6645c6ebda20b82cd697390d"
+}
+```
+**Response:** The function returns the code 200 and the message "Conversation initialized successfully" upon successful creation of the conversation. If an error occurs, it returns the code 400 with a message specifying the error.
+
+
+## Send user message to chatbot
+**Route:** `/user-chat-message`  
+**Methods:** `POST`  
+**Description:** Handles user messages sent to the specified chatbot, through a POST request.  
+**Request parameters:**
+- **conversation_id (required, string)**: The unique identifier of the conversation.
+- **sender_id (required, string)**: The unique identifier of the user who sends the message.
+- **message (required, string)**: The text message sent by the user.
+
+**Expected data format (example):**
+```json
+POST /user-chat-message
+
+{
+    "conversation_id": "6645c6ebda20b82cd697390d",
+    "sender_id": "43379a1b-f39d-489b-bb9c-8d8adbce6325",
+    "message": "Hi, my name is Ciuchino!"
+}
+```
+**Response:** A JSON object with the following properties:
+- **conversation_id (string)**: The conversation ID (same as the request parameter).
+- **response (string)**: The chatbot's response to the user message.
 
 
 ## Get user's friends
