@@ -7,8 +7,6 @@ from lib.log import LogType, Logger, Log
 from lib.database import MongoDB
 from lib.llm import ConversationalChatBot, ChatbotManager
 
-active_conversations = {}
-
 
 def register_conversation_routes(
     app: Flask, db: MongoDB, cbm: ChatbotManager, logger: Logger = None
@@ -91,8 +89,11 @@ def register_conversation_routes(
         conversation_id = data.get("conversation_id")
         sender_id = data.get("sender_id")
         message = data.get("message")
-        response = cbm.send_message_to_chatbot(cid=conversation_id, message=message)
-        return jsonify({"conversation_id": conversation_id, "response": response})
+
+        status_code, response = cbm.send_message_to_chatbot(
+            cid=conversation_id, message=message)
+
+        return make_response(jsonify({"conversation_id": conversation_id, "response": response}), status_code)
 
     @app.route("/foochatbot", methods=["GET"])
     def foo():
