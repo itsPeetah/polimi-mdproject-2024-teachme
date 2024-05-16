@@ -82,26 +82,26 @@ class ConversationsCollection(Collection):
             else None
         )
 
-    def get_user_conversations(self, user_email: str) -> list[Conversation]:
+    def get_user_conversations(self, user_email: str) -> list[str]:
         """
-        Returns all the conversations that the user is involved in.
+        Returns the ids of all the conversations that the user is involved in.
         If the user is a teacher, this method returns all the conversations that the user created.
         If the user is a student, this method returns all the conversations that were assigned to the user.
 
         Args:
-            user_email (str): Email of the student
+            user_email (str): Email of the user
 
         Returns:
-            list[Conversation]: A list of Conversation objects the user is involved in.
+            list[str]: A list of ids of the conversations that the user is involved in.
         """
         query = {"$or": [
             {"teacher_email": user_email},
             {"student_email": user_email},
         ]}
-        conversation_cursor = self._collection.find(query)
-        conversations = [Conversation(**conversation)
-                         for conversation in conversation_cursor]
+        conversation_cursor = self._collection.find(query, projection=["_id"])
+        conversations = [str(conversation["_id"]) for conversation in conversation_cursor]
         return conversations
+    
 
     def create_conversation(self,
                             user_level: str = None,

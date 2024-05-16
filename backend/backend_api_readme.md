@@ -168,14 +168,40 @@ POST /user-chat-message
 - **response (string)**: The chatbot's response to the user message.
 
 
+## Get user's conversations
+**Route:** `/list-user-conversations/<user_email>`  
+**Methods:** `GET`  
+**Description:** Returns the ids of all the conversations that the user is involved in. If the user is a teacher, this method returns all the conversations that the user created. If the user is a student, this method returns all the conversations that were assigned to the user.
+**Query parameters:**
+- **user_email (required, string):** email address of the user.
+
+**Expected data format (example):**  `GET /list-user-conversations/student@example.com`
+
+**Response:** A JSON file containing the ids of all the conversations that the user is involed in.  
+**Error handling:** Returns error 400 if a problem occurred.
+
+
+## Get conversation info
+**Route:** `/get-conversation-info/<conversation_id>`  
+**Methods:** `GET`  
+**Description:** Returns information about the conversation with the specified id.
+**Query parameters:**
+- **conversation_id (required, string):** id of the conversation.
+
+**Expected data format (example):**  `GET /get-conversation-info/6645c6ebda20b82cd697390d`
+
+**Response:** A JSON containing the information about the conversation with the specified id.  
+**Error handling:** Returns error 400 if a problem occurred.
+
+
 ## Get user's friends
 **Route:** `/get-friends/<user_email>`  
 **Methods:** `GET`  
 **Description:** Retrieves all the friends of the user. If the user is a teacher, this returns all the teacher's students. If the user is a student, this returns all the student's teachers.  
 **Query parameters:**
-- **user_email (required):** email address of the user.
+- **user_email (required, string):** email address of the user.
 
 **Expected data format (example):**  `GET /get-friends/student@example.com`
 
-**Response:** The function returns a **list** containing the friends of the specified user.  
+**Response:** The function returns a JSON containing the friends of the specified user.  
 **Error handling:** Returns error 400 if the specified user was not found in the database.
