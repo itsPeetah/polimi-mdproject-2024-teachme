@@ -171,7 +171,7 @@ POST /user-chat-message
 ## Get user's conversations
 **Route:** `/list-user-conversations/<user_email>`  
 **Methods:** `GET`  
-**Description:** Returns the ids of all the conversations that the user is involved in. If the user is a teacher, this method returns all the conversations that the user created. If the user is a student, this method returns all the conversations that were assigned to the user.
+**Description:** Returns the ids of all the conversations that the user is involved in. If the user is a teacher, this method returns all the conversations that the user created. If the user is a student, this method returns all the conversations that were assigned to the user.  
 **Query parameters:**
 - **user_email (required, string):** email address of the user.
 
@@ -184,7 +184,7 @@ POST /user-chat-message
 ## Get conversation info
 **Route:** `/get-conversation-info/<conversation_id>`  
 **Methods:** `GET`  
-**Description:** Returns information about the conversation with the specified id.
+**Description:** Returns information about the conversation with the specified id.  
 **Query parameters:**
 - **conversation_id (required, string):** id of the conversation.
 
