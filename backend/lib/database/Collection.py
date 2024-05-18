@@ -94,16 +94,26 @@ class ConversationsCollection(Collection):
             user_email (str): Email of the user
 
         Returns:
-            list[str]: A list of ids of the conversations that the user is involved in.
+            list[dict]: A list of the conversations that the user is involved in.
         """
         query = {"$or": [
             {"teacher_email": user_email},
             {"student_email": user_email},
         ]}
-        conversation_cursor = self._collection.find(query, projection=["_id"])
-        conversations = [str(conversation["_id"]) for conversation in conversation_cursor]
+        conversation_cursor = self._collection.find(query)
+
+        conversations = [{
+            "_id": str(conversation["_id"]),
+            "user_level": conversation["user_level"],
+            "difficulty": conversation["difficulty"],
+            "topic": conversation["topic"],
+            "teacher_email": conversation["teacher_email"],
+            "student_email": conversation["student_email"],
+            "is_ended": conversation["is_ended"],
+            "time_limit": conversation["time_limit"],
+        }
+            for conversation in conversation_cursor]
         return conversations
-    
 
     def create_conversation(self,
                             user_level: str = None,

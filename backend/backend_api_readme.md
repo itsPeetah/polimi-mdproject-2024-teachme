@@ -171,13 +171,40 @@ POST /user-chat-message
 ## Get user's conversations
 **Route:** `/list-user-conversations/<user_email>`  
 **Methods:** `GET`  
-**Description:** Returns the ids of all the conversations that the user is involved in. If the user is a teacher, this method returns all the conversations that the user created. If the user is a student, this method returns all the conversations that were assigned to the user.  
+**Description:** Returns the list of all the conversations that the user is involved in. If the user is a teacher, this method returns all the conversations that the user created. If the user is a student, this method returns all the conversations that were assigned to the user.  
 **Query parameters:**
 - **user_email (required, string):** email address of the user.
 
 **Expected data format (example):**  `GET /list-user-conversations/student@example.com`
 
-**Response:** A JSON file containing the ids of all the conversations that the user is involed in.  
+**Response:** A JSON file containing the ids of all the conversations that the user is involed in.
+
+**Example response:**
+> **REQUEST**: /list-user-conversations/paolo@mail.com
+```json
+[
+    {
+        "_id": "66448e578aa4c6fea2e853ee",
+        "difficulty": "easy",
+        "is_ended": false,
+        "student_email": "paolo@mail.com",
+        "teacher_email": "pietro@mail.com",
+        "time_limit": 5,
+        "topic": "Hot dogs",
+        "user_level": "intermediate"
+    },
+    {
+        "_id": "66448e7df3ccbc576da02ca9",
+        "difficulty": "easy",
+        "is_ended": false,
+        "student_email": "paolo@mail.com",
+        "teacher_email": "pietro@mail.com",
+        "time_limit": 5,
+        "topic": "Hot dogs",
+        "user_level": "intermediate"
+    },
+]
+```
 **Error handling:** Returns error 400 if a problem occurred.
 
 
