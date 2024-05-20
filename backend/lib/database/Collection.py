@@ -183,6 +183,13 @@ class UserDataCollection(Collection):
         super().__init__(collection, collection_name)
 
     def register(self, user: User) -> User:
+        """Register a new user in the database.
+
+        :param user: the user object to be registered
+        :type user: User
+        :return: the registered user object
+        :rtype: User
+        """
         self._collection.insert_one(user.__dict__)
         return user
 
@@ -327,13 +334,46 @@ class UserDataCollection(Collection):
         #         friends.append(user)
         return user.friends
 
+    def get_all_students(self) -> list[dict]:
+        """
+        Returns all the students in the database.
+
+        :return: A list of all the students in the database.
+        :rtype: list[dict]
+        """
+        students_cursor = self._collection.find({"role": "student"})
+        students = []
+        for student in students_cursor:
+            students.append(
+                {
+                    "_id": str(student["_id"]),
+                    "username": student["username"],
+                    "email": student["email"],
+                }
+            )
+        return students
+
     def retrieve_by_id(self, user_id: str) -> Optional[User]:
+        """Retrieve a user by its ID.
+
+        :param user_id: the ID of the user to retrieve
+        :type user_id: str
+        :return: the user object
+        :rtype: Optional[User]
+        """
         user = self._collection.find_one({"_id": user_id})
         if not user:
             return None
         return User(**user)
 
-    def retrieve_by_email(self, email: str) -> User:
+    def retrieve_by_email(self, email: str) -> Optional[User]:
+        """Retrieve a user by its email.
+
+        :param email: the email of the user to retrieve
+        :type email: str
+        :return: the user object
+        :rtype: Optional[User]
+        """
         user = self._collection.find_one({"email": email})
         if not user:
             return None

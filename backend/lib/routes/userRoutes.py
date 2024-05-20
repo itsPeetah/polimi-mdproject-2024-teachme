@@ -22,7 +22,7 @@ def register_user_routes(app: Flask, db: MongoDB, logger: Logger):
         data = request.get_json()
         teacher_email = data.get("teacher_email")
         student_email = data.get("student_email")
-        # db = app_db_connector.connect("teachme_main")
+
         user_data_collection = db.get_collection("user_data")
         user_data_collection.remove_friendship_using_email(
             teacher_email=teacher_email, student_email=student_email
@@ -43,5 +43,33 @@ def register_user_routes(app: Flask, db: MongoDB, logger: Logger):
         if user_email is None:
             return make_response(400, "KO")
         user_data_collection = db.get_collection("user_data")
-        user_friends = user_data_collection.get_user_friends(user_email=user_email)
+        user_friends = user_data_collection.get_user_friends(
+            user_email=user_email)
         return jsonify(user_friends)
+
+    @app.route("/get-all-students", methods=["GET"])
+    def get_all_students():
+        user_data_collection = db.get_collection("user_data")
+        students = user_data_collection.get_all_students()
+        return make_response(jsonify(students), 200)
+
+    @app.route("/get-username/<user_email>", methods=["GET"])
+    def get_username(user_email: str):
+        """Endpoint to get the username and friends of a user by their email.
+
+        :param user_email: The email of the user.
+        :type user_email: str
+        :return: The username and friends of the user.
+        :rtype: Response
+        """
+        user_data_collection = db.get_collection("user_data")
+        user = user_data_collection.retrieve_by_email(user_email)
+        if user is not None:
+            response = {
+                "username": user.username,
+                "friends": user.friends
+            }
+
+            return make_response(jsonify(response), 200)
+        else:
+            return make_response("The user with the specified email does not exist.", 400)
