@@ -232,3 +232,62 @@ POST /user-chat-message
 
 **Response:** The function returns a JSON containing the friends of the specified user.  
 **Error handling:** Returns error 400 if the specified user was not found in the database.
+
+## Get all the students registered to the platform
+**Route:** `/get-all-students`  
+**Methods:** `GET`  
+**Description:** Retrieves all the students registered to the platform, returning a list of dictionaries containing the students' email addresses, usernames and ids. 
+
+**Expected data format (example):**  `GET /get-all-students`
+
+**Response:** The function returns a JSON containing a list of dictionaries, each containing the email address, username and id of a student.
+
+**Example response:**
+> **REQUEST**: /get-all-students
+```json
+[
+    {
+        "_id": "cd70b6d8-d393-487b-9faf-aeaa10904349",
+        "email": "pie6@mail.com",
+        "username": "pietro6"
+    },
+    {
+        "_id": "07c291ac-74e5-4bda-95f2-319800ed70b2",
+        "email": "pie7@mail.com",
+        "username": "pie7"
+    },
+
+    ...,
+
+    {
+        "_id": "727a604b-f8e2-4f8d-add4-0406ac375bfa",
+        "email": "s@s.com",
+        "username": "s"
+    }
+]
+```
+## Get username and friends
+**Route:** `/get-username/<user_email>`  
+**Methods:** `GET`  
+**Description:** Retrieves the username and friends of the user with the specified email address.
+**Query parameters:**
+- **user_email (required, string):** email address of the user.
+
+**Expected data format (example):**  `GET /get-username/student@example.com`
+
+**Response:** The function returns a JSON containing the username and friends of the specified user.
+
+**Example response:**
+> **REQUEST**: /get-username/pietestpostman_teach@mail.com
+```json
+
+{
+    "friends": [
+        "pietestpostman@mail.com"
+    ],
+    "username": "pietestpostman_teach"
+}
+
+```
+
+**Error handling:** Returns error 400 if the specified user was not found in the database.
