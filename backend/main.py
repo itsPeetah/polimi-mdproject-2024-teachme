@@ -39,7 +39,7 @@ if __name__ == "__main__":
     # from lib.llm import test_chatbot
     # test_chatbot(
     #     api_key=getenv("OPENAI_API_KEY"),
-    #     conversation_id="6639ea3410a08c3689597981",
-    #     db = db,
-    #     logger = logger
+    #     conversation_id="664db610f09c2cbb0215d6d9",
+    #     db=db,
+    #     logger=logger
     # )

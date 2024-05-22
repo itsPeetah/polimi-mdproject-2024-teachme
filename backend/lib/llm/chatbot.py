@@ -250,15 +250,13 @@ class ConversationalChatBot(BaseChatBot):
 def test_chatbot(
     api_key: str,
     conversation_id: int,
-    db_connector: Connector,
-    db_name: str,
+    db: MongoDB,
     logger: Logger = None,
 ):
     chatbot = ConversationalChatBot(
         api_key=api_key,
         conversation_id=conversation_id,
-        db_connector=db_connector,
-        db_name=db_name,
+        db=db,
         logger=logger,
     )
     while chatbot._is_active:
