@@ -4,6 +4,7 @@
 import warnings
 import time
 from threading import Thread
+import json
 
 from langchain_openai import ChatOpenAI
 from langchain_core.tools import tool
@@ -302,7 +303,7 @@ class ConversationalChatBot(BaseChatBot):
 
         post_actions_thread = Thread(
             target=self.do_post_conversation_actions,
-            args=[message],
+            args=[message, chatbot_response["output"]],
         )
         post_actions_thread.start()
 
@@ -347,17 +348,56 @@ class ConversationalChatBot(BaseChatBot):
 
         return result
 
-    def do_post_conversation_actions(self, user_message: str):
+    def do_post_conversation_actions(self, user_message: str, chatbot_response: str):
         results = (
             self.post_conversation_chatbot.do_all_post_conversation_actions(
                 user_message
             ),
         )
         synonyms, pronunciation, feedback = results
-        # insert user's message in managed
-        # call 3 chat prompts for the message
-        # update the message with its challenges/feedback
-        # insert assistant's reply in managed
+
+        # Validate json
+        try:
+            syn_json = json.loads(synonyms)
+        except:
+            syn_json = None
+
+        try:
+            pron_json = json.loads(pronunciation)
+        except:
+            pron_json = None
+
+        try:
+            feed_json = json.loads(feedback)
+        except:
+            feed_json = None
+
+        mc_collection = self._db.get_collection("managed_conversations")
+        mc_collection.add_message(
+            self.conversation_id,
+            {
+                "message_content": user_message,
+                "role": "human",
+                "feedback": feed_json,
+                "synonyms": syn_json,
+                "pronunciation": pron_json,
+            },
+        )
+        mc_collection.add_message(
+            self.conversation_id,
+            {
+                "message_content": chatbot_response,
+                "role": "ai",
+                "feedback": None,
+                "synonyms": None,
+                "pronunciation": None,
+            },
+        )
+
+    def get_post_conversation_info(self):
+        # TODO: get conversation info from db
+        # TODO: return conversation info
+        pass
 
 
 def test_chatbot(

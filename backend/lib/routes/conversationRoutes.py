@@ -41,8 +41,7 @@ def register_conversation_routes(
             time_limit = time_limit_temp
 
         conversations_collection = db.get_collection("conversations")
-        managed_conversations_collection = db.get_collection(
-            "managed_conversations")
+        managed_conversations_collection = db.get_collection("managed_conversations")
         conv = conversations_collection.create_conversation(
             user_level=user_level,
             difficulty=difficulty,
@@ -74,7 +73,8 @@ def register_conversation_routes(
         conversations_collection = db.get_collection("conversations")
         if user_email is not None:
             conversations = conversations_collection.get_user_conversations(
-                user_email=user_email)
+                user_email=user_email
+            )
             return jsonify(conversations)
         else:
             return make_response(400, "The user email was not specified.")
@@ -93,7 +93,8 @@ def register_conversation_routes(
         conversations_collection = db.get_collection("conversations")
         if conversation_id is not None:
             conversation = conversations_collection.find_by_id(
-                conversation_id=conversation_id)
+                conversation_id=conversation_id
+            )
             conversation._id = str(conversation._id)
             return jsonify(conversation)
         else:
@@ -138,9 +139,13 @@ def register_conversation_routes(
         message = data.get("message")
 
         status_code, response = cbm.send_message_to_chatbot(
-            cid=conversation_id, message=message)
+            cid=conversation_id, message=message
+        )
 
-        return make_response(jsonify({"conversation_id": conversation_id, "response": response}), status_code)
+        return make_response(
+            jsonify({"conversation_id": conversation_id, "response": response}),
+            status_code,
+        )
 
     @app.route("/end-conversation/<conversation_id>", methods=["GET"])
     def end_conversation():
@@ -158,6 +163,21 @@ def register_conversation_routes(
         (status_code, response) = cbm.end_chatbot(conversation_id, db, logger)
 
         return make_response(response, status_code)
+
+    @app.route("/post-conversation-info/<conversation_id>", methods=["GET"])
+    def post_conversation_info(conversation_id: str):
+
+        if type(conversation_id) != str or len(conversation_id) < 1:
+            return make_response("Missing conversation ID", 400)
+
+        mcc = db.get_collection("managed_conversations")
+        conversation_info = mcc.get_by_id(conversation_id)
+        if conversation_info is None:
+            return make_response(
+                f"Conversation with id {conversation_id} does not exist.", 400
+            )
+
+        return make_response(jsonify(conversation_info), 200)
 
     @app.route("/foochatbot", methods=["GET"])
     def foo():

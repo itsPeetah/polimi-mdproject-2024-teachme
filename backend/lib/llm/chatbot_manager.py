@@ -1,4 +1,5 @@
 """Module for managing the chatbots for the conversations."""
+
 from threading import Lock, Thread
 from time import sleep
 from os import getenv
@@ -132,8 +133,8 @@ class ChatbotManager:
         :type cid: str
         :param message: the message to send to the chatbot coming from the user
         :type message: str
-        :return: Returns a tuple containing the status code and the response message. 
-        The response message is the chatbot's response to the user message or an error 
+        :return: Returns a tuple containing the status code and the response message.
+        The response message is the chatbot's response to the user message or an error
         message in case the conversation is not initialized.
         :rtype: tuple[int, str]
         """
@@ -142,7 +143,7 @@ class ChatbotManager:
         if chatbot is None:
             return (
                 400,
-                "Chatbot not initialized. Before sending messages, you must initialize the conversation. See /initialize-conversation."
+                "Chatbot not initialized. Before sending messages, you must initialize the conversation. See /initialize-conversation.",
             )
 
         response = chatbot.send_message(message)
