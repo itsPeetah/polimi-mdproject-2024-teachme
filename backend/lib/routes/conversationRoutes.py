@@ -41,7 +41,8 @@ def register_conversation_routes(
             time_limit = time_limit_temp
 
         conversations_collection = db.get_collection("conversations")
-        managed_conversations_collection = db.get_collection("managed_conversations")
+        managed_conversations_collection = db.get_collection(
+            "managed_conversations")
         conv = conversations_collection.create_conversation(
             user_level=user_level,
             difficulty=difficulty,
@@ -148,7 +149,7 @@ def register_conversation_routes(
         )
 
     @app.route("/end-conversation/<conversation_id>", methods=["GET"])
-    def end_conversation():
+    def end_conversation(conversation_id: str):
         """
         Ends the conversation with the specified id.
 
@@ -158,8 +159,6 @@ def register_conversation_routes(
         Returns (Response):
             The function returns the code 200 and the message "Conversation ended successfully" upon successful ending of the conversation. If an error occurs, it returns the code 400 with a message specifying the error.
         """
-        conversation_id = request.args.get("conversation_id")
-
         (status_code, response) = cbm.end_chatbot(conversation_id, db, logger)
 
         return make_response(response, status_code)

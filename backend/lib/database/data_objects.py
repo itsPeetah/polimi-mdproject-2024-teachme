@@ -67,3 +67,4 @@ class ManagedConversation:
     _id: any
     messages: list
     role_reversed_prompt: str
+    overall_feedback: str

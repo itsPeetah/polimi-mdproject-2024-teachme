@@ -172,7 +172,8 @@ class ConversationsCollection(Collection):
         )
 
         if res.matched_count == 0:
-            raise ValueError(f"Conversation with id {conversation_id} not found.")
+            raise ValueError(
+                f"Conversation with id {conversation_id} not found.")
 
 
 class UserDataCollection(Collection):
@@ -476,6 +477,7 @@ class ManagedConversationsCollection(Collection):
         conversation_id: str,
         messages: list = None,
         reversed_role_prompt: str = None,
+        overall_feedback: str = None,
     ) -> ManagedConversation:
         """Creates a new managed conversation in the database.
 
@@ -490,17 +492,18 @@ class ManagedConversationsCollection(Collection):
         :type messages: list
         :param reversed_role_prompt: the prompt for the reversed role challenge conversation.
         :type reversed_role_prompt: str
+        :param overall_feedback: the overall feedback for the conversation.
+        :type overall_feedback: str
         :return: the managed conversation object created in the database.
         :rtype: ManagedConversation
         """
         managed_conversation_object = {
             "_id": ObjectId(conversation_id),
             "messages": messages if messages is not None else [],
-            "role_reversed_prompt": (
-                reversed_role_prompt if reversed_role_prompt is not None else ""
-            ),
+            "role_reversed_prompt": reversed_role_prompt if reversed_role_prompt is not None else "",
+            "overall_feedback": overall_feedback if overall_feedback is not None else "",
         }
-        result = self._collection.insert_one(managed_conversation_object)
+        self._collection.insert_one(managed_conversation_object)
         return ManagedConversation(**managed_conversation_object)
 
     def add_message(self, conversation_id: str, message: dict) -> None:
@@ -513,7 +516,8 @@ class ManagedConversationsCollection(Collection):
         """
         try:
             self._collection.update_one(
-                {"_id": ObjectId(conversation_id)}, {"$push": {"messages": message}}
+                {"_id": ObjectId(conversation_id)}, {
+                    "$push": {"messages": message}}
             )
         except KeyError:
             print(f"Conversation with id {conversation_id} not found.")
@@ -533,6 +537,39 @@ class ManagedConversationsCollection(Collection):
             ManagedConversation(**managed_conversation)
             if managed_conversation is not None
             else None
+        )
+
+    def get_formatted_conversation_string(self, conversation_id: str) -> str:
+        """Retrieve the formatted conversation string for the given conversation ID.
+
+        :param conversation_id: id of the conversation. Equal to the conversation id in the conversations collection.
+        :type conversation_id: str
+        :return: the formatted conversation string
+        :rtype: str
+        """
+        managed_conversation = self.get_by_id(conversation_id)
+        if managed_conversation is None:
+            return ""
+
+        conversation_string = ""
+        for message in managed_conversation.messages:
+            if message["role"] == "ai":
+                conversation_string += f"Conversational partner message: {message['message_content']}\n"
+            else:
+                conversation_string += f"User message: {message['message_content']}\n"
+        return conversation_string
+
+    def set_overall_feedback(self, conversation_id: str, overall_feedback: str) -> None:
+        """Set the overall feedback for the conversation.
+
+        :param conversation_id: id of the conversation. Equal to the conversation id in the conversations collection.
+        :type conversation_id: str
+        :param overall_feedback: the overall feedback for the conversation.
+        :type overall_feedback: str
+        """
+        self._collection.update_one(
+            {"_id": ObjectId(conversation_id)}, {
+                "$set": {"overall_feedback": overall_feedback}}
         )
 
 
@@ -563,7 +600,8 @@ class CollectionDispatcher:
         :rtype: Collection
         """
         if collection_name not in self._connection_names:
-            raise KeyError(f"Collection {collection_name} not found in the database.")
+            raise KeyError(
+                f"Collection {collection_name} not found in the database.")
 
         # switching to the correct collection
         if collection_name == "conversations":
