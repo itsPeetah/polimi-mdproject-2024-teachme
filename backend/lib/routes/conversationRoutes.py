@@ -177,6 +177,7 @@ def register_conversation_routes(
                 f"Conversation with id {conversation_id} does not exist.", 400
             )
 
+        conversation_info._id = str(conversation_info._id)
         return make_response(jsonify(conversation_info), 200)
 
     @app.route("/foochatbot", methods=["GET"])

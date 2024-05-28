@@ -96,33 +96,39 @@ class ConversationsCollection(Collection):
         Returns:
             list[dict]: A list of the conversations that the user is involved in.
         """
-        query = {"$or": [
-            {"teacher_email": user_email},
-            {"student_email": user_email},
-        ]}
+        query = {
+            "$or": [
+                {"teacher_email": user_email},
+                {"student_email": user_email},
+            ]
+        }
         conversation_cursor = self._collection.find(query)
 
-        conversations = [{
-            "_id": str(conversation["_id"]),
-            "user_level": conversation["user_level"],
-            "difficulty": conversation["difficulty"],
-            "topic": conversation["topic"],
-            "teacher_email": conversation["teacher_email"],
-            "student_email": conversation["student_email"],
-            "is_ended": conversation["is_ended"],
-            "time_limit": conversation["time_limit"],
-        }
-            for conversation in conversation_cursor]
+        conversations = [
+            {
+                "_id": str(conversation["_id"]),
+                "user_level": conversation["user_level"],
+                "difficulty": conversation["difficulty"],
+                "topic": conversation["topic"],
+                "teacher_email": conversation["teacher_email"],
+                "student_email": conversation["student_email"],
+                "is_ended": conversation["is_ended"],
+                "time_limit": conversation["time_limit"],
+            }
+            for conversation in conversation_cursor
+        ]
         return conversations
 
-    def create_conversation(self,
-                            user_level: str = None,
-                            difficulty: str = None,
-                            topic: str = None,
-                            teacher_email: str = None,
-                            student_email: str = None,
-                            is_ended: bool = False,
-                            time_limit: int = 5):
+    def create_conversation(
+        self,
+        user_level: str = None,
+        difficulty: str = None,
+        topic: str = None,
+        teacher_email: str = None,
+        student_email: str = None,
+        is_ended: bool = False,
+        time_limit: int = 5,
+    ):
         """
         Creates a new conversation in the database.
 
@@ -166,8 +172,7 @@ class ConversationsCollection(Collection):
         )
 
         if res.matched_count == 0:
-            raise ValueError(
-                f"Conversation with id {conversation_id} not found.")
+            raise ValueError(f"Conversation with id {conversation_id} not found.")
 
 
 class UserDataCollection(Collection):
@@ -217,26 +222,37 @@ class UserDataCollection(Collection):
         if not student:
             raise ValueError(f"Student with email '{student_email}' not found")
 
-        existing_friendship = self._collection.find_one({"$or": [{"email": student_email, "friends": teacher_email}, {
-                                                        "email": teacher_email, "friends": student_email}]})
+        existing_friendship = self._collection.find_one(
+            {
+                "$or": [
+                    {"email": student_email, "friends": teacher_email},
+                    {"email": teacher_email, "friends": student_email},
+                ]
+            }
+        )
         if existing_friendship:
             print(
-                f"Friendship between {teacher.email} and {student.email} already exists.")
+                f"Friendship between {teacher.email} and {student.email} already exists."
+            )
         else:
             update_student = {"$push": {"friends": teacher.email}}
             result_student = self._collection.update_one(
-                {"email": student.email}, update_student)
+                {"email": student.email}, update_student
+            )
 
             update_teacher = {"$push": {"friends": student.email}}
             result_teacher = self._collection.update_one(
-                {"email": teacher.email}, update_teacher)
+                {"email": teacher.email}, update_teacher
+            )
 
             if result_student.matched_count > 0 and result_teacher.matched_count > 0:
                 print(
-                    f"Successfully created friendship between {teacher.email} and {student.email}")
+                    f"Successfully created friendship between {teacher.email} and {student.email}"
+                )
             else:
                 print(
-                    f"An error occurred while creating friendship between {teacher.email} and {student.email}")
+                    f"An error occurred while creating friendship between {teacher.email} and {student.email}"
+                )
 
     def create_friendship_using_id(self, teacher_id: str, student_id: str):
         """
@@ -283,13 +299,18 @@ class UserDataCollection(Collection):
         update_teacher = {"$pull": {"friends": student.email}}
 
         result_student = self._collection.update_one(
-            {"email": student.email}, update_student)
+            {"email": student.email}, update_student
+        )
         result_teacher = self._collection.update_one(
-            {"email": teacher.email}, update_teacher)
+            {"email": teacher.email}, update_teacher
+        )
 
-        if (result_student.matched_count > 0 or result_teacher.matched_count > 0) and (result_student.modified_count > 0 or result_teacher.modified_count > 0):
+        if (result_student.matched_count > 0 or result_teacher.matched_count > 0) and (
+            result_student.modified_count > 0 or result_teacher.modified_count > 0
+        ):
             print(
-                f"Successfully removed friendship between {teacher.email} and {student.email}")
+                f"Successfully removed friendship between {teacher.email} and {student.email}"
+            )
         else:
             print(f"No friendship found to remove.")
 
@@ -450,7 +471,12 @@ class ManagedConversationsCollection(Collection):
         """
         super().__init__(collection, collection_name)
 
-    def create_managed_conversation(self, conversation_id: str, messages: list = None, reversed_role_prompt: str = None) -> ManagedConversation:
+    def create_managed_conversation(
+        self,
+        conversation_id: str,
+        messages: list = None,
+        reversed_role_prompt: str = None,
+    ) -> ManagedConversation:
         """Creates a new managed conversation in the database.
 
         A managed conversation is a structured conversation object that keeps
@@ -470,12 +496,12 @@ class ManagedConversationsCollection(Collection):
         managed_conversation_object = {
             "_id": ObjectId(conversation_id),
             "messages": messages if messages is not None else [],
-            "role_reversed_prompt": reversed_role_prompt if reversed_role_prompt is not None else "",
+            "role_reversed_prompt": (
+                reversed_role_prompt if reversed_role_prompt is not None else ""
+            ),
         }
-
         result = self._collection.insert_one(managed_conversation_object)
-
-        return ManagedConversation(**result)
+        return ManagedConversation(**managed_conversation_object)
 
     def add_message(self, conversation_id: str, message: dict) -> None:
         """Add a message to the managed conversation.
@@ -487,8 +513,8 @@ class ManagedConversationsCollection(Collection):
         """
         try:
             self._collection.update_one(
-                {"_id": ObjectId(conversation_id)},
-                {"$push": {"messages": message}})
+                {"_id": ObjectId(conversation_id)}, {"$push": {"messages": message}}
+            )
         except KeyError:
             print(f"Conversation with id {conversation_id} not found.")
 
@@ -501,11 +527,16 @@ class ManagedConversationsCollection(Collection):
         :rtype: ManagedConversation
         """
         managed_conversation = self._collection.find_one(
-            {"_id": ObjectId(conversation_id)})
-        return ManagedConversation(**managed_conversation) if managed_conversation is not None else None
+            {"_id": ObjectId(conversation_id)}
+        )
+        return (
+            ManagedConversation(**managed_conversation)
+            if managed_conversation is not None
+            else None
+        )
 
 
-class CollectionDispatcher():
+class CollectionDispatcher:
     """
     Dispatcher class for managing collections in the database.
     """
@@ -532,19 +563,22 @@ class CollectionDispatcher():
         :rtype: Collection
         """
         if collection_name not in self._connection_names:
-            raise KeyError(
-                f"Collection {collection_name} not found in the database.")
+            raise KeyError(f"Collection {collection_name} not found in the database.")
 
         # switching to the correct collection
         if collection_name == "conversations":
             return ConversationsCollection(self._db[collection_name], collection_name)
         elif collection_name == "user_data":
             return UserDataCollection(self._db[collection_name], collection_name)
-        elif collection_name == 'chat_message_history':
-            return ChatMessageHistoryCollection(self._db[collection_name], collection_name)
-        elif collection_name == 'logs':
+        elif collection_name == "chat_message_history":
+            return ChatMessageHistoryCollection(
+                self._db[collection_name], collection_name
+            )
+        elif collection_name == "logs":
             return LogsCollection(self._db[collection_name], collection_name)
-        elif collection_name == 'managed_conversations':
-            return ManagedConversationsCollection(self._db[collection_name], collection_name)
+        elif collection_name == "managed_conversations":
+            return ManagedConversationsCollection(
+                self._db[collection_name], collection_name
+            )
         else:
             return Collection(self._db[collection_name], collection_name)
