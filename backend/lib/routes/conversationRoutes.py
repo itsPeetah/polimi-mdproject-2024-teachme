@@ -51,7 +51,6 @@ def register_conversation_routes(
         )
 
         return jsonify({"conversation_id": str(conv._id)})
-    
 
     @app.route("/list-user-conversations/<user_email>", methods=["GET"])
     def list_user_conversations(user_email):
@@ -69,12 +68,12 @@ def register_conversation_routes(
         """
         conversations_collection = db.get_collection("conversations")
         if user_email is not None:
-            conversations = conversations_collection.get_user_conversations(user_email=user_email)
+            conversations = conversations_collection.get_user_conversations(
+                user_email=user_email)
             return jsonify(conversations)
         else:
             return make_response(400, "The user email was not specified.")
-        
-    
+
     @app.route("/get-conversation-info/<conversation_id>", methods=["GET"])
     def get_conversation_info(conversation_id):
         """
@@ -82,18 +81,18 @@ def register_conversation_routes(
 
         Args:
             conversation_id (required, string): id of the conversation.
-        
+
         Return (Response):
             A JSON containing the information about the conversation with the specified id. If a problem occurs, the funtion returns error 400.
         """
         conversations_collection = db.get_collection("conversations")
         if conversation_id is not None:
-            conversation = conversations_collection.find_by_id(conversation_id=conversation_id)
+            conversation = conversations_collection.find_by_id(
+                conversation_id=conversation_id)
             conversation._id = str(conversation._id)
             return jsonify(conversation)
         else:
             return make_response(400, "The conversation id was not specified.")
-
 
     @app.route("/initialize-conversation", methods=["POST"])
     def initialize_conversation():
@@ -112,7 +111,6 @@ def register_conversation_routes(
         (status_code, response) = cbm.init_chatbot(conversation_id, db, logger)
 
         return make_response(response, status_code)
-
 
     @app.route("/user-chat-message", methods=["POST"])
     def user_chat_message():
@@ -139,6 +137,22 @@ def register_conversation_routes(
 
         return make_response(jsonify({"conversation_id": conversation_id, "response": response}), status_code)
 
+    @app.route("/end-conversation/<conversation_id>", methods=["GET"])
+    def end_conversation():
+        """
+        Ends the conversation with the specified id.
+
+        Args:
+            conversation_id (required, string): id of the conversation.
+
+        Returns (Response):
+            The function returns the code 200 and the message "Conversation ended successfully" upon successful ending of the conversation. If an error occurs, it returns the code 400 with a message specifying the error.
+        """
+        conversation_id = request.args.get("conversation_id")
+
+        (status_code, response) = cbm.end_chatbot(conversation_id, db, logger)
+
+        return make_response(response, status_code)
 
     @app.route("/foochatbot", methods=["GET"])
     def foo():

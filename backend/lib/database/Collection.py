@@ -438,6 +438,26 @@ class LogsCollection(Collection):
         self._collection.insert_one(log)
 
 
+class EndedConversationsCollection(Collection):
+    """
+    Represents a collection of ended conversations in the database.
+    """
+
+    def __init__(self, collection, collection_name: str) -> None:
+        """
+        Initialize a EndedConversationsCollection object.
+
+        :param collection: the collection object from the database
+        :type collection: any
+        :param collection_name: name of the collection
+        :type collection_name: str
+        """
+        super().__init__(collection, collection_name)
+
+    def new_ended_conversation(self, conversation_id: str, messages: list, reversed_role_prompt: str):
+        pass
+
+
 class CollectionDispatcher():
     """
     Dispatcher class for managing collections in the database.
@@ -477,5 +497,7 @@ class CollectionDispatcher():
             return ChatMessageHistoryCollection(self._db[collection_name], collection_name)
         elif collection_name == 'logs':
             return LogsCollection(self._db[collection_name], collection_name)
+        elif collection_name == 'ended_conversations':
+            return EndedConversationsCollection(self._db[collection_name], collection_name)
         else:
             return Collection(self._db[collection_name], collection_name)

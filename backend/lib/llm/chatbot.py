@@ -195,9 +195,22 @@ class ConversationalChatBot(BaseChatBot):
             ),
         )
 
-    def send_message(self, message: str) -> str:
+    def send_message(self, message: str) -> dict:
+        """Sends a message to the chatbot and returns the response.
+
+        :param message: The message to send by the user to the chatbot.
+        :type message: str
+        :return: The response from the chatbot. It includes the chatbot's output and the chatbot's active status.
+        :rtype: dict
+        """
         # Reset the timestamp of the last user message
         self._last_user_message_timestamp = time.time()
+
+        if self._is_active is False:
+            return {
+                "output": "The chatbot is not active. The conversation has ended.",
+                "is_chatbot_active": self._is_active,
+            }
 
         # Invoke the chat model with the user message
         response = self._chat.invoke(
@@ -217,7 +230,12 @@ class ConversationalChatBot(BaseChatBot):
         self._is_active = False
 
     @property
-    def conversation_id(self) -> int:
+    def conversation_id(self) -> str:
+        """Returns the conversation ID of the conversation the chatbot is assigned to.
+
+        :return: The conversation ID.
+        :rtype: str
+        """
         return self._conversation_id
 
     @property
@@ -249,10 +267,21 @@ class ConversationalChatBot(BaseChatBot):
 
 def test_chatbot(
     api_key: str,
-    conversation_id: int,
+    conversation_id: str,
     db: MongoDB,
     logger: Logger = None,
 ):
+    """Helper method to test the conversational chatbot functionalities.
+
+    :param api_key: chatbot provider API key
+    :type api_key: str
+    :param conversation_id: ID of the conversation
+    :type conversation_id: str
+    :param db: MongoDB database connection
+    :type db: MongoDB
+    :param logger: application logger, defaults to None
+    :type logger: Logger, optional
+    """
     chatbot = ConversationalChatBot(
         api_key=api_key,
         conversation_id=conversation_id,

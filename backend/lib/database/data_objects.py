@@ -58,3 +58,12 @@ class Log:
     log_type: LogType
     message: str
     time_stamp: datetime
+
+
+@dataclass
+class EndedConversation:
+    """Represents an ended conversation.
+    """
+    _id: any
+    messages: list
+    role_reversed_prompt: str

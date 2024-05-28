@@ -148,3 +148,22 @@ class ChatbotManager:
         response = chatbot.send_message(message)
         response_message = response["output"]
         return 200, response_message
+
+    def end_chatbot(self, cid: str, db: MongoDB, logger: Logger) -> None:
+        """End the chatbot for the specified conversation.
+
+        :param cid: id of the conversation to end
+        :type cid: str
+        :param db: database instance containing the conversations data
+        :type db: MongoDB
+        :param logger: logger instance to log messages
+        :type logger: Logger
+        """
+        chatbot = self.get_chatbot(cid)
+        if chatbot:
+            chatbot.deactivate()
+            del self.chatbots[cid]
+
+        # Update the conversation in the database
+        # TODO: get messages and create a new EndedConversation object
+        conversations_collection = db.get_collection("conversations")
