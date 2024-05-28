@@ -42,9 +42,9 @@ class ChatMessage:
     Represents a chat message.
     """
 
-    message_id: int
-    conversation_id: int
-    sender_id: int
+    message_id: any
+    conversation_id: str
+    sender_id: str
     message: str
     timestamp: int
 
@@ -61,7 +61,7 @@ class Log:
 
 
 @dataclass
-class EndedConversation:
+class ManagedConversation:
     """Represents an ended conversation.
     """
     _id: any

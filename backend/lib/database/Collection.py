@@ -9,7 +9,7 @@ from typing import List, Optional
 from bson.objectid import ObjectId
 
 from ..log import LogType
-from .data_objects import Conversation, User
+from .data_objects import Conversation, User, ManagedConversation
 
 
 class Collection:
@@ -324,14 +324,6 @@ class UserDataCollection(Collection):
         if not user:
             raise ValueError(f"User with email {user_email} not found")
 
-        # friends_cursor = self._collection.find({"email": {"$in": user.friends}})
-        # print(friends_cursor)
-        # print(f"User friends: {user.friends}")
-        # friends = []
-        # for friend in friends_cursor:
-        #     user = self.retrieve_by_email(friend)
-        #     if user:
-        #         friends.append(user)
         return user.friends
 
     def get_all_students(self) -> list[dict]:
@@ -438,7 +430,7 @@ class LogsCollection(Collection):
         self._collection.insert_one(log)
 
 
-class EndedConversationsCollection(Collection):
+class ManagedConversationsCollection(Collection):
     """
     Represents a collection of ended conversations in the database.
     """
@@ -454,8 +446,59 @@ class EndedConversationsCollection(Collection):
         """
         super().__init__(collection, collection_name)
 
-    def new_ended_conversation(self, conversation_id: str, messages: list, reversed_role_prompt: str):
-        pass
+    def create_managed_conversation(self, conversation_id: str, messages: list = None, reversed_role_prompt: str = None) -> ManagedConversation:
+        """Creates a new managed conversation in the database.
+
+        A managed conversation is a structured conversation object that keeps
+        track of the messages exchanged between the user and the chatbot.
+        The user messages are stored with additional information for post
+        conversation analysis.
+
+        :param conversation_id: id of the conversation. Equal to the conversation id in the conversations collection.
+        :type conversation_id: str
+        :param messages: list of messages exchanged between the user and the chatbot.
+        :type messages: list
+        :param reversed_role_prompt: the prompt for the reversed role challenge conversation.
+        :type reversed_role_prompt: str
+        :return: the managed conversation object created in the database.
+        :rtype: ManagedConversation
+        """
+        managed_conversation_object = {
+            "_id": ObjectId(conversation_id),
+            "messages": messages if messages is not None else [],
+            "role_reversed_prompt": reversed_role_prompt if reversed_role_prompt is not None else "",
+        }
+
+        result = self._collection.insert_one(managed_conversation_object)
+
+        return ManagedConversation(**result)
+
+    def add_message(self, conversation_id: str, message: dict) -> None:
+        """Add a message to the managed conversation.
+
+        :param conversation_id: id of the conversation. Equal to the conversation id in the conversations collection.
+        :type conversation_id: str
+        :param message: the message to add to the conversation.
+        :type message: dict
+        """
+        try:
+            self._collection.update_one(
+                {"_id": ObjectId(conversation_id)},
+                {"$push": {"messages": message}})
+        except KeyError:
+            print(f"Conversation with id {conversation_id} not found.")
+
+    def get_by_id(self, conversation_id: str) -> ManagedConversation:
+        """Retrieve a managed conversation by its ID.
+
+        :param conversation_id: id of the conversation. Equal to the conversation id in the conversations collection.
+        :type conversation_id: str
+        :return: the managed conversation object
+        :rtype: ManagedConversation
+        """
+        managed_conversation = self._collection.find_one(
+            {"_id": ObjectId(conversation_id)})
+        return ManagedConversation(**managed_conversation) if managed_conversation is not None else None
 
 
 class CollectionDispatcher():
@@ -497,7 +540,7 @@ class CollectionDispatcher():
             return ChatMessageHistoryCollection(self._db[collection_name], collection_name)
         elif collection_name == 'logs':
             return LogsCollection(self._db[collection_name], collection_name)
-        elif collection_name == 'ended_conversations':
-            return EndedConversationsCollection(self._db[collection_name], collection_name)
+        elif collection_name == 'managed_conversations':
+            return ManagedConversationsCollection(self._db[collection_name], collection_name)
         else:
             return Collection(self._db[collection_name], collection_name)

@@ -41,6 +41,8 @@ def register_conversation_routes(
             time_limit = time_limit_temp
 
         conversations_collection = db.get_collection("conversations")
+        managed_conversations_collection = db.get_collection(
+            "managed_conversations")
         conv = conversations_collection.create_conversation(
             user_level=user_level,
             difficulty=difficulty,
@@ -48,6 +50,9 @@ def register_conversation_routes(
             teacher_email=teacher_email,
             student_email=student_email,
             time_limit=time_limit,
+        )
+        managed_conversations_collection.create_managed_conversation(
+            conversation_id=str(conv._id),
         )
 
         return jsonify({"conversation_id": str(conv._id)})
