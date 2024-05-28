@@ -3,6 +3,7 @@
 
 import warnings
 import time
+from threading import Thread
 
 from langchain_openai import ChatOpenAI
 from langchain_core.tools import tool
@@ -12,7 +13,7 @@ from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_mongodb.chat_message_histories import MongoDBChatMessageHistory
 
-from .PROMPTS import get_prompt
+from .PROMPTS import *
 from ..database import Connector, MongoDBConnector, MongoDB, Conversation
 from ..log import LogType, Log, Logger
 
@@ -38,7 +39,7 @@ class BaseChatBot:
         self.temperature = temperature
         self.logger = logger
 
-        self._chat_base = model(
+        self._chat_base: BaseChatModel = model(
             model=model_version,
             api_key=self.api_key,
             temperature=temperature,
@@ -54,6 +55,80 @@ class BaseChatBot:
             self.logger.log(Log(LogType.CHATBOT, message))
         else:
             print(f"CHATBOT - {message}")
+
+
+class PostConversationChatBot(BaseChatBot):
+    def __init__(
+        self,
+        api_key: str,
+        conversation_id: str,
+        db: MongoDB,
+        logger: Logger,
+        temperature: float = 0.7,
+        model: BaseChatModel = ChatOpenAI,
+        model_version: str = "gpt-3.5-turbo",
+    ):
+        super().__init__(api_key, model, model_version, temperature, logger)
+
+        self._db = db
+        self._conversation_id = conversation_id
+
+        # # Check if the data already exists in the database collection
+        # # named 'conversations'
+        # if db is not None:
+        #     conversations = db.get_collection("conversations_managed")
+        #     conversation = conversations.find_by_id(conversation_id)
+        #     if conversation is None:
+        #         self.log(
+        #             f"""This error has been raised by the {self.__class__.__name__} class.
+        #                  The conversation with ID {conversation_id} was not found in the database, meaning that it has not been created yet."""
+        #         )
+
+        #         raise ValueError(
+        #             "The conversation with the given ID was not found in the database."
+        #         )
+
+        if self._conversation_id is None:
+            raise ValueError("The conversation ID must be set.")
+
+        self._chat = model
+        self._config = None
+
+    def _do_post_message_action(self, system_prompt: str, user_message: str):
+        prompt_template = ChatPromptTemplate.from_messages(
+            [("system", system_prompt), ("user", "{user_message}")]
+        )
+        prompt_template = prompt_template.invoke({"user_message": user_message})
+        response = self._chat_base.invoke(prompt_template)
+        # Extract choice
+        # AIMessage(content="I'm sorry, as an AI assistant, I do not have the capability to know your name unless you provide it to me.", response_metadata={'token_usage': {'completion_tokens': 26, 'prompt_tokens': 12, 'total_tokens': 38}, 'model_name': 'gpt-3.5-turbo', 'system_fingerprint': 'fp_caf95bb1ae', 'finish_reason': 'stop', 'logprobs': None}, id='run-8d8a9d8b-dddb-48f1-b0ed-ce80ce5397d8-0')
+        response = response.content  # TODO We should validate the content :)
+        return response
+
+    def _do_synonym_challenge(self, user_message: str):
+        challenge = self._do_post_message_action(
+            get_synonym_challenge_prompt(), user_message
+        )
+        return challenge
+
+    def _do_pronunciation_challenge(self, user_message: str):
+        challenge = self._do_post_message_action(
+            get_synonym_challenge_prompt(), user_message
+        )
+        return challenge
+
+    def _do_message_feedback(self, user_message: str):
+        feedback = self._do_post_message_action(
+            get_synonym_challenge_prompt(), user_message
+        )
+        return feedback
+
+    def do_all_post_conversation_actions(self, user_message: str):
+        synonyms = self._do_synonym_challenge(user_message)
+        pronunciation = self._do_pronunciation_challenge(user_message)
+        feedback = self._do_message_feedback(user_message)
+        # TODO Add roles reversed
+        return synonyms, pronunciation, feedback
 
 
 class ConversationalChatBot(BaseChatBot):
@@ -123,7 +198,11 @@ class ConversationalChatBot(BaseChatBot):
         self._chat = None
         self._config = None
 
-        self.load_chat_history()
+        self.post_conversation_chatbot = PostConversationChatBot(
+            api_key=api_key, conversation_id=self._conversation_id, db=db, logger=logger
+        )
+
+        self.load_chat_historyelf.load_chat_history()
 
     def _create_end_conversation_tool(self):
         @tool
@@ -177,13 +256,11 @@ class ConversationalChatBot(BaseChatBot):
             output_messages_key="output",
             history_messages_key="history",
         )
-        self._config = {"configurable": {
-            "session_id": f"{self._conversation_id}"}}
+        self._config = {"configurable": {"session_id": f"{self._conversation_id}"}}
 
     def _get_message_history(self, session_id: int) -> str:
         if self._db is None:
-            warnings.warn(
-                "No database connection provided. Returning empty string.")
+            warnings.warn("No database connection provided. Returning empty string.")
             return ""
 
         return (
@@ -222,6 +299,12 @@ class ConversationalChatBot(BaseChatBot):
             "output": response.get("output"),
             "is_chatbot_active": self._is_active,
         }
+
+        post_actions_thread = Thread(
+            target=self.do_post_conversation_actions,
+            args=[message],
+        )
+        post_actions_thread.start()
 
         return chatbot_response
 
@@ -263,6 +346,18 @@ class ConversationalChatBot(BaseChatBot):
             result = False
 
         return result
+
+    def do_post_conversation_actions(self, user_message: str):
+        results = (
+            self.post_conversation_chatbot.do_all_post_conversation_actions(
+                user_message
+            ),
+        )
+        synonyms, pronunciation, feedback = results
+        # insert user's message in managed
+        # call 3 chat prompts for the message
+        # update the message with its challenges/feedback
+        # insert assistant's reply in managed
 
 
 def test_chatbot(
