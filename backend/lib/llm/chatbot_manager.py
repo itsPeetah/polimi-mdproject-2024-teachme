@@ -165,6 +165,16 @@ class ChatbotManager:
             chatbot.deactivate()
             del self.chatbots[cid]
 
-        # Update the conversation in the database
-        # TODO: get messages and create a new EndedConversation object
+        # Set the conversation as ended in the database
         conversations_collection = db.get_collection("conversations")
+
+        try:
+            conversations_collection.end_conversation(cid)
+            logger.log(
+                Log(LogType.INFO, f"Chatbot for conversation {cid} ended."))
+        except ValueError:
+            logger.log(
+                Log(LogType.ERROR, f"Failed to end conversation {cid} in the database."))
+            return 400, "Failed to end conversation in the database. The conversation with given id does not exists."
+
+        return 200, "Conversation ended successfully."

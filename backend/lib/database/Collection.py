@@ -161,9 +161,13 @@ class ConversationsCollection(Collection):
         Args:
             conversation_id (str): ID of the conversation to end.
         """
-        self._collection.update_one(
+        res = self._collection.update_one(
             {"_id": ObjectId(conversation_id)}, {"$set": {"is_ended": True}}
         )
+
+        if res.matched_count == 0:
+            raise ValueError(
+                f"Conversation with id {conversation_id} not found.")
 
 
 class UserDataCollection(Collection):
