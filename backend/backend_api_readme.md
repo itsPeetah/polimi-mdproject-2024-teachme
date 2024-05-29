@@ -291,3 +291,94 @@ POST /user-chat-message
 ```
 
 **Error handling:** Returns error 400 if the specified user was not found in the database.
+
+## End Conversation
+**Route:** `/end-conversation/<conversation_id>`    
+**Methods:** `GET`    
+**Description:** Ends the conversation with the specified id. Once a conversation is ended, the user will not be able to conversate with the chatbot in that conversation anymore.  
+**Query parameters:**   
+- **conversation_id (required, string):** id of the conversation to end.    
+
+**Expected data format (example):**  `GET /end-conversation/6645c6zzzz20b82cd697390d`
+
+**Response:** The function returns a success message upon successful ending of the conversation.
+**Error handling:** Returns error 400 if the specified conversation was not found in the database, i.e., if an error occured.
+
+## Get post-conversation feedbacks
+**Route:** `/post-conversation-info/<conversation_id>`  
+**Methods:** `GET`  
+**Description:** Retrieves the post-conversation feedbacks of the conversation with the specified id.
+**Query parameters:**   
+- **conversation_id (required, string):** id of the conversation to get the feedbacks from. 
+
+**Expected data format (example):**  `GET /post-conversation-info/6645c6zzzz20b82cd697390d`
+
+**Response:** The function returns a JSON containing the post-conversation feedbacks of the specified conversation. A detailed structure of the JSON is provided below.
+
+**Example response:**
+> **REQUEST**: /post-conversation-info/6645c6zzzz20b82cd697390d
+```json
+{
+    "_id": "6645c6zzzz20b82cd697390d",
+    "messages": [
+        {
+            "message_content": "I love apples", // content of the message
+            "role": "human", // this value could be either 'human' or 'ai'
+            "feedback": {
+                "hasMistake": false,
+                "messageFeedback": "" 
+            },
+            "synonims": [], // no interesting words for which synonims should be shown to the user
+            "pronunciation": [], // no particularly difficult words to pronounce detected in the user message
+        },
+        {
+            "message_content": "That's wonderful to hear! Apples are not only delicious but also offer numerous health benefits.",
+            "role": "ai",
+            "feedback": null,  // 'ai' messages do not have a feedback
+            "synonims": null,  // 'ai' messages do not have the synonim challenge
+            "pronunciation": null,  // 'ai' messages do not have the pronunciation challenge
+        },
+        ...,
+        {
+            "message_content": "The vibrant colors of the orchids added a touch of biuty to the garden.",
+            "role": "human",
+            "feedback": {
+                "hasMistake": true,
+                "messageFeedback": "The word beauty has been misspelled. You have said 'biuty'." 
+            },
+            "synonims": [
+                "garden", // the word said by the user while conversating
+                "Yard", // 1st possible synonim of the word garden
+                "Park", // 2nd possible synonim of the word garden
+                "Orchard", // 3rd possible synonim of the word garden
+            ],
+            "pronunciation": [
+                "beauty", // 1st difficult word said by the user that is difficult to pronounce
+                ...,
+                "orchids" // n-th difficult word said by the user that is difficult to pronounce
+            ],
+        }
+    ],
+    "role_reversed_prompt": "", // ignore this field
+    "overall_feedback": "Thank you for engaging in this conversation and sharing about your university project success and your passion for tennis. Your enthusiasm for both topics shines through, which is great for building rapport in a conversation.
+
+**Strengths:**
+1. **Expressing Achievements:** You effectively communicated your recent success with the university project and the good grade you received, showcasing a positive accomplishment.
+2. **Passion for Tennis:** Your love for tennis comes across clearly in your responses, especially when you mentioned enjoying the strategic aspect of the game and your admiration for players like Roger Federer.
+
+**Areas for Improvement:**
+1. **Clarity and Detail:** Try to provide more specific details when discussing your experiences. For instance, instead of saying you've been playing tennis since you were a child without remembering the exact date, you could estimate the years or talk about memorable moments in your tennis journey.
+2. **Elaboration and Engagement:** When discussing your favorite player, Roger Federer, you briefly mentioned his retirement without expanding on how his style or achievements influenced your love for tennis. Providing more depth to your responses can enrich the conversation.
+
+**Suggestions for Improvement:**
+1. **Share Personal Experiences:** Try to share personal anecdotes or specific instances related to playing tennis or watching matches. This can make your responses more engaging and relatable.
+2. **Ask Questions:** To keep the conversation dynamic, consider asking your conversational partner questions about their interests or opinions, which can lead to more interactive and enjoyable exchanges.
+3. **Expand on Ideas:** When discussing tennis players or tournaments, delve deeper into why you admire certain players or what excites you about current matches. This can add depth to the conversation and invite further discussion.
+
+Overall, your participation in the conversation was positive. By incorporating more details, personal insights, and interactive elements, you can further enhance your communication skills and enrich future conversations. Keep up the good work and continue sharing your experiences and interests with enthusiasm!"
+}
+```
+> **NOTE**: the overall feedback is compiled only when the conversation has been successfully ended.     
+In the case above, the content of the feedback and of the messages are not correlated since the feedback string has been placed only for demonstration purposes. With a true conversation the overall feedback reflects both the content and the structure of the conversation it refers to.
+
+**Error handling:** Returns error 400 if the specified conversation was not found in the database, i.e., if an error occured.
