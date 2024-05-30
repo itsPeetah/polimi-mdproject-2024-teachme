@@ -232,15 +232,16 @@ class ConversationalChatBot(BaseChatBot):
                 ),
                 MessagesPlaceholder(variable_name="history"),
                 ("human", "{answer}"),
-                MessagesPlaceholder(variable_name="agent_scratchpad"),
+                # MessagesPlaceholder(variable_name="agent_scratchpad"),
             ]
         )
-        tools = [self._create_end_conversation_tool()]
-        agent = create_openai_tools_agent(self._chat_base, tools, prompt)
-        agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=False)
+        _chat_with_history = prompt | self._chat_base
+        # tools = [self._create_end_conversation_tool()]
+        # agent = create_openai_tools_agent(self._chat_base, tools, prompt)
+        # agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=False)
 
         self._chat = RunnableWithMessageHistory(
-            agent_executor,
+            _chat_with_history,
             lambda session_id: MongoDBChatMessageHistory(
                 connection_string=self._db.db_connection_string,
                 session_id=session_id,
@@ -248,7 +249,7 @@ class ConversationalChatBot(BaseChatBot):
                 collection_name="chat_message_history",
             ),
             input_messages_key="answer",
-            output_messages_key="output",
+            # output_messages_key="output",
             history_messages_key="history",
         )
         self._config = {"configurable": {
@@ -293,7 +294,7 @@ class ConversationalChatBot(BaseChatBot):
         )
 
         chatbot_response = {
-            "output": response.get("output"),
+            "output": response.content,
             "is_chatbot_active": self._is_active,
         }
 
@@ -455,4 +456,4 @@ def test_chatbot(
     )
     while chatbot._is_active:
         bot_answer = chatbot.send_message(str(input("User message: ")))
-        print(f"Bot answer: {bot_answer.get('output')}")
+        print(f"Bot answer: {bot_answer['output']}")
