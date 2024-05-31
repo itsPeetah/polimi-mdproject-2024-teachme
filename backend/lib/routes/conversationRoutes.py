@@ -41,8 +41,7 @@ def register_conversation_routes(
             time_limit = time_limit_temp
 
         conversations_collection = db.get_collection("conversations")
-        managed_conversations_collection = db.get_collection(
-            "managed_conversations")
+        managed_conversations_collection = db.get_collection("managed_conversations")
         conv = conversations_collection.create_conversation(
             user_level=user_level,
             difficulty=difficulty,
@@ -178,6 +177,17 @@ def register_conversation_routes(
 
         conversation_info._id = str(conversation_info._id)
         return make_response(jsonify(conversation_info), 200)
+
+    @app.route("/create-conversation-roles-reversed", methods=["POST"])
+    def create_roles_reversed_conversation():
+        # Get conv id from request data
+        # Check if conv is ended
+        # if not ended return 400
+        # Get summary
+        # Get roles reversed prompt
+        # Create new conversation
+        # return conversation
+        pass
 
     @app.route("/foochatbot", methods=["GET"])
     def foo():
