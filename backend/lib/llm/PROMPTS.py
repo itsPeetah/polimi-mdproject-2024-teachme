@@ -74,8 +74,7 @@ The response should just include the list with no extra formatting.
         "args": [],
     },
     "USER_OPINION_SYNTHESIS": {
-        "text": """This is a conversation transcript between a user and his conversational partner:
-{conversation_transcript}
+        "text": """The following is a conversation transcript between a user and his conversational partner:
 Please, give a short summary of the User feels about the topic and general position.
 """,
         "args": ["conversation_transcript"],
@@ -179,9 +178,9 @@ def get_pronunciation_challenge_prompt():
     return get_prompt("CHALLENGE_PRONUNCIATION_SYSTEM_PROMPT")
 
 
-def get_roles_reversed_user_summary_prompt(conversation_transcript: str):
+def get_roles_reversed_user_summary_prompt():
     return get_prompt(
-        "USER_OPINION_SYNTHESIS", conversation_transcript=conversation_transcript
+        "USER_OPINION_SYNTHESIS",
     )
 
 

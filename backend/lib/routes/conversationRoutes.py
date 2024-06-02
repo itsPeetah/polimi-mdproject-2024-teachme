@@ -181,13 +181,32 @@ def register_conversation_routes(
     @app.route("/create-conversation-roles-reversed", methods=["POST"])
     def create_roles_reversed_conversation():
         # Get conv id from request data
-        # Check if conv is ended
-        # if not ended return 400
-        # Get summary
-        # Get roles reversed prompt
-        # Create new conversation
-        # return conversation
-        pass
+        data = request.get_json()
+        conv_id = data.get("conversation_id")
+        if conv_id is None:
+            return make_response("Missing conversation ID in request body", 400)
+        cc = db.get_collection("conversations")
+        conv_og = cc.find_by_id(conversation_id=conv_id)
+        if conv_og is None:
+            return make_response("The conversation does not exist.", 400)
+        if not conv_og.is_ended:
+            return make_response("The conversation has not ended yet.", 400)
+
+        mcc = db.get_collection("managed_conversations")
+        conv_new = cc.create_conversation(
+            user_level=conv_og.user_level,
+            difficulty=conv_og.difficulty,
+            topic=conv_og.topic,
+            teacher_email=conv_og.teacher_email,
+            student_email=conv_og.student_email,
+            time_limit=conv_og.time_limit,
+            # TODO ROLESREVERSED: This is missing a parameter to make it "roles reversed"
+        )
+        mcc.create_managed_conversation(
+            conversation_id=str(conv_new._id),
+        )
+
+        return jsonify({"conversation_id": str(conv_og._id)})
 
     @app.route("/foochatbot", methods=["GET"])
     def foo():
