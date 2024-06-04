@@ -61,6 +61,7 @@ POST /login
 **Response:** Returns a JSON object containing:
 
 - user_id: The identifier of the logged-in user.
+- user_email: The email of the logged-in user.
 - role: The role of the logged-in user.
 
 **Error handling:** Returns error 400 if no user is logged in.

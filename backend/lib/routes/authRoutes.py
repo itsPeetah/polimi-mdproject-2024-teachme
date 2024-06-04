@@ -36,6 +36,6 @@ def register_auth_routes(app: Flask, user_auth: AuthenticationService):
         try:
             uid = request.cookies["uid"]
             user = user_auth.get_user_by_id(uid)
-            return jsonify({"user_id": user._id, "role": user.role})
+            return jsonify({"user_id": user._id, "user_email": user.email, "role": user.role})
         except:
             return make_response("KO", 400)
