@@ -49,6 +49,7 @@ def register_conversation_routes(
             teacher_email=teacher_email,
             student_email=student_email,
             time_limit=time_limit,
+            parent_conversation_id=None,
         )
         managed_conversations_collection.create_managed_conversation(
             conversation_id=str(conv._id),
@@ -200,13 +201,13 @@ def register_conversation_routes(
             teacher_email=conv_og.teacher_email,
             student_email=conv_og.student_email,
             time_limit=conv_og.time_limit,
-            # TODO ROLESREVERSED: This is missing a parameter to make it "roles reversed"
+            parent_conversation_id=conv_og.id,
         )
         mcc.create_managed_conversation(
             conversation_id=str(conv_new._id),
         )
 
-        return jsonify({"conversation_id": str(conv_og._id)})
+        return jsonify({"conversation_id": str(conv_new._id)})
 
     @app.route("/foochatbot", methods=["GET"])
     def foo():

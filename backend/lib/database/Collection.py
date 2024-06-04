@@ -128,6 +128,7 @@ class ConversationsCollection(Collection):
         student_email: str = None,
         is_ended: bool = False,
         time_limit: int = 5,
+        parent_conversation_id: str = None,
     ):
         """
         Creates a new conversation in the database.
@@ -153,6 +154,7 @@ class ConversationsCollection(Collection):
             "student_email": student_email,
             "is_ended": is_ended,
             "time_limit": time_limit,
+            "parent_conversation_id": parent_conversation_id,
         }
         result = self._collection.insert_one(conversation_dict)
 
@@ -585,7 +587,8 @@ class ManagedConversationsCollection(Collection):
         :type overall_feedback: str
         """
         self._collection.update_one(
-            {"_id": ObjectId(conversation_id)}, {"$set": {"user_summary": user_summary}}
+            {"_id": ObjectId(conversation_id)},
+            {"$set": {"roles_reversed_prompt": user_summary}},
         )
 
 

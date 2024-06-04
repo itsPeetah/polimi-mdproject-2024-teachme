@@ -240,9 +240,11 @@ class ConversationalChatBot(BaseChatBot):
                 conversation_topic=self._conversation_topic,
             )
         }
-        # TODO ROLESREVERSED: Add prompt addendum
-        # if conv(conv_id) is roles_reversed_challenge:
-        #   chat_system_prompt += "\n" + get_addendum(managed_conv.summary)
+
+        summary = self._get_parent_conversation_summary()
+        if summary is not None:
+            addendum = get_roles_reversed_system_prompt_addendum(summary)
+            chat_system_prompt += f"\n{addendum}"
 
         prompt = ChatPromptTemplate.from_messages(
             [
@@ -449,6 +451,20 @@ class ConversationalChatBot(BaseChatBot):
         mc_collection = self._db.get_collection("managed_conversations")
         mc_collection.set_overall_feedback(self.conversation_id, feedback)
         mc_collection.set_user_opinion_summary(self.conversation_id, summary)
+
+    def _get_parent_conversation_summary(self):
+        # Fetch conversation data
+        c_collection = self._db.get_collection("conversations")
+        conversation = c_collection.find_by_id(self.conversation_id)
+        if conversation is None or conversation.parent_conversation_id is None:
+            return None
+        # Fetch parent conversation data
+        mc_collection = self._db.get_collection("managed_conversations")
+        managed = mc_collection.get_by_id(conversation.parent_conversation_id)
+        if managed is None or managed.role_reversed_prompt is None:
+            return None
+        roles_reversed_summary = managed.role_reversed_prompt
+        return roles_reversed_summary
 
 
 def test_chatbot(

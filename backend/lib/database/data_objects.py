@@ -34,6 +34,7 @@ class Conversation:
     student_email: str
     is_ended: bool
     time_limit: int
+    parent_conversation_id: Optional[str]
 
 
 @dataclass
@@ -62,8 +63,8 @@ class Log:
 
 @dataclass
 class ManagedConversation:
-    """Represents an ended conversation.
-    """
+    """Represents an ended conversation."""
+
     _id: any
     messages: list
     role_reversed_prompt: str
