@@ -35,9 +35,9 @@
   <span> · </span>
     <a href="https://github.com/itsPeetah/TasteIt/blob/main/documentation/tasteit_report.pdf">Documentation</a>
   <span> · </span>
-    <a href="https://github.com/itsPeetah/polimi-mdproject-2024-teachme/issues/">Report Bug</a>
+    <a href="https://github.com/itsPeetah/polimi-mdproject-2024-teachme/wiki">Wiki</a>
   <span> · </span>
-    <a href="https://github.com/itsPeetah/polimi-mdproject-2024-teachme/issues">Request Feature</a>
+    <a href="https://github.com/itsPeetah/polimi-mdproject-2024-teachme/issues">Request Feature / Report bug</a>
   </h4>
 </div>
 
@@ -238,11 +238,19 @@ function App() {
 <!-- Roadmap -->
 ## :compass: Roadmap
 
-* [x] Requirement analysis
-* [x] Design
-* [x] MVP implementation
-* [ ] Testing with real users
-* [ ] Deployment
+|         Feature name          |                                                    Description                                                        | Status |
+|:------------------------------|:----------------------------------------------------------------------------------------------------------------------|:------:|
+|    Registration and Login     | Users, students and teachers, must sign up and log in to the platform to use it                                       |   ✅   |
+| Teacher conversation creation | Teachers can create conversations specifying topic, difficulty, and length                                            |   ✅   |
+| Student and teacher dashboard | Students and teachers have a dashboard containing the conversations they created/have been assigned respectively      |   ✅   |
+|        Speech-to-text         | Speech-to-text functionality to transcribe the user's speech during the conversation                                  |   ✅   |
+|      Conversational Agent     | LLM implementation for handling the conversation between students and conversational partner                          |   ✅   |
+|        Text-to-speech         | Text-to-speech functionality for allowing the conversational partner to speak                                         |   ✅   |
+|   Viseme for facial position  | The artificial agent must look like an avatar and make reasonable mouth movements while talking according to visemes  |   ✅   |
+|   Post-conversation feedback  | Once a conversation has ended, the platform must provide feedback to students regarding the conversation itself       |   ✅   |
+|  Post-conversation challenges | The platform must provide additional challenges (synonmis, pronunciation, ...) to students once the conversation ends |   ✅   |
+|          Pilot-test           | Test the system and its functionalities with external people                                                          |   ❌   |
+> **_KEY:_** [✅]() Done [❌]() Not done yet
 
 <!-- FAQ -->
 ## :grey_question: FAQ
@@ -258,6 +266,6 @@ function App() {
 <!-- Contact -->
 ## :handshake: Contact
 
-You can contact us by email. You can find all the information regarding our contacts in the [:busts_in_silhouette: Team Members](#-team-members) section.
+You can contact us by email. You can find all the information regarding our contacts in the [:busts_in_silhouette: Team Members](#busts_in_silhouette-team-members) section.
 
 Project Link: [https://github.com/itsPeetah/polimi-mdproject-2024-teachme](https://github.com/itsPeetah/polimi-mdproject-2024-teachme)
