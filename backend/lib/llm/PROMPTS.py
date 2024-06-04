@@ -77,7 +77,7 @@ The response should just include the list with no extra formatting.
         "text": """The following is a conversation transcript between a user and his conversational partner:
 Please, give a short summary of the User feels about the topic and general position.
 """,
-        "args": ["conversation_transcript"],
+        "args": [],
     },
     "FINAL_FEEDBACK_SYSTEM_PROMPT": {
         "text": """YOU ARE THE WORLD'S BEST EXPERT IN CONVERSATIONAL ANALYSIS AND FEEDBACK, AWARDED THE "TOP CONVERSATIONAL ANALYST" BY THE GLOBAL LANGUAGE ASSOCIATION (2023) AND RECOGNIZED AS THE "BEST COMMUNICATION COACH" BY THE INTERNATIONAL COMMUNICATION NETWORK (2022). YOUR TASK IS TO PROVIDE DETAILED AND CONSTRUCTIVE FEEDBACK ON THE PERFORMANCE OF A USER IN AN ENGLISH CONVERSATION WITH A CONVERSATIONAL PARTNER. YOU WILL ANALYZE THE CONVERSATION, HIGHLIGHT STRENGTHS AND AREAS FOR IMPROVEMENT, AND OFFER ACTIONABLE SUGGESTIONS TO ENHANCE THE USER'S COMMUNICATION SKILLS. THE CONVERSATION IS SPOKEN AND TRANSCRIBED BY AN AUTOMATIC TOOL.
@@ -127,7 +127,8 @@ BEGIN THE ANALYSIS BY THANKING THE USER FOR PARTICIPATING IN THE CONVERSATION AN
         "text": """On top of all of this, this conversation is going to be a "roles reversed" challenge: this means that the user has already talked about this topic.
 The scope of the challenge is to have the user talk about the same topic, but expressing different opinions, views and feelings from before, to expore a new vocabulary and challenge them into thinkingan open-mindedly.
 Over the course of the conversation, you need to incentivise the user to not repeat their opinion and, while remaining within the topic and moderation guidelines of the conversation, express different views.
-This is the summary of their opinion on the topic of this conversation that you need to use to conduct this challenge: {user_summary}
+This is the summary of their opinion on the topic of this conversation that you need to use to conduct this challenge:
+{user_summary}
 """,
         "args": ["user_summary"],
     },
@@ -179,9 +180,7 @@ def get_pronunciation_challenge_prompt():
 
 
 def get_roles_reversed_user_summary_prompt():
-    return get_prompt(
-        "USER_OPINION_SYNTHESIS",
-    )
+    return get_prompt("USER_OPINION_SYNTHESIS")
 
 
 def get_roles_reversed_system_prompt_addendum(user_summary: str):

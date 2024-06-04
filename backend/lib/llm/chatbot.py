@@ -133,7 +133,7 @@ class PostConversationChatBot(BaseChatBot):
         return feedback
 
     def do_roles_reversed_challenge(self, full_conversation):
-        summary = self._do_user_opinion_summary()
+        summary = self._do_user_opinion_summary(full_conversation)
         return summary
 
 
@@ -232,14 +232,12 @@ class ConversationalChatBot(BaseChatBot):
 
         """
 
-        chat_system_prompt = {
-            get_prompt(
-                prompt_name="CONVERSATIONAL_SYSTEM_PROMPT",
-                user_level=self._conversation_user_level,
-                conversation_difficulty=self._conversation_difficulty,
-                conversation_topic=self._conversation_topic,
-            )
-        }
+        chat_system_prompt = get_prompt(
+            prompt_name="CONVERSATIONAL_SYSTEM_PROMPT",
+            user_level=self._conversation_user_level,
+            conversation_difficulty=self._conversation_difficulty,
+            conversation_topic=self._conversation_topic,
+        )
 
         summary = self._get_parent_conversation_summary()
         if summary is not None:

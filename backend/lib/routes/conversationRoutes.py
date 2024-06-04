@@ -201,7 +201,7 @@ def register_conversation_routes(
             teacher_email=conv_og.teacher_email,
             student_email=conv_og.student_email,
             time_limit=conv_og.time_limit,
-            parent_conversation_id=conv_og.id,
+            parent_conversation_id=str(conv_og._id),
         )
         mcc.create_managed_conversation(
             conversation_id=str(conv_new._id),

@@ -588,7 +588,7 @@ class ManagedConversationsCollection(Collection):
         """
         self._collection.update_one(
             {"_id": ObjectId(conversation_id)},
-            {"$set": {"roles_reversed_prompt": user_summary}},
+            {"$set": {"role_reversed_prompt": user_summary}},
         )
 
 
