@@ -46,12 +46,12 @@
 <!-- Table of Contents -->
 # :notebook_with_decorative_cover: Table of Contents
 
-- [About the Project](#-about-the-project)
-  * [Team Members](#-team-members)
-  * [Screenshots](#-screenshots)
-  * [Tech Stack](#-tech-stack)
-  * [Features](#-features)
-  * [Environment Variables](#-environment-variables)
+- [About the Project](#star2-about-the-project)
+  * [Team Members](#busts_in_silhouette-team-members)
+  * [Screenshots](#camera-screenshots)
+  * [Tech Stack](#space_invaders-tech-stack)
+  * [Features](#dart-features)
+  * [Environment Variables](#key-environment-variables)
 - [Getting Started](#toolbox-getting-started)
   * [Prerequisites](#bangbang-prerequisites)
   * [Installation](#gear-installation)
