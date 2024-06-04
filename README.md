@@ -151,15 +151,16 @@ Students have the following functionalities:
 
 To run this project, you will need to add the following environment variables to your .env file inside the **backend folder**:
 
-```
+```env
 OPENAI_API_KEY=<YOUR OPENAI API KEY>
 MONGODB_URI=<YOUR MONGODB ATLAS URI>
 ```
 
-For running the frontend you will need to add the following environment variables to your .env file inside the **frontend folder**:
+For running the frontend you will need to add the following environment variables to your .env.local file inside the root directory of the repository:
 
-```
+```env
 NEXT_PUBLIC_SPEECH_KEY=<YOUR AZURE TTS API KEY>
+NEXT_PUBLIC_SPEECH_REGION='westeurope'
 ```
 <!-- Getting Started -->
 ## 	:toolbox: Getting Started
