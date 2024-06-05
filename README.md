@@ -49,7 +49,7 @@
 - [About the Project](#star2-about-the-project)
   * [Team Members](#busts_in_silhouette-team-members)
   * [Screenshots](#camera-screenshots)
-  * [Tech Stack](#space_invaders-tech-stack)
+  * [Tech Stack](#space_invader-tech-stack)
   * [Features](#dart-features)
   * [Environment Variables](#key-environment-variables)
 - [Getting Started](#toolbox-getting-started)
@@ -71,13 +71,13 @@ Second language acquisition (SLA) is a complex process influenced by several fac
 TEACHme aims to address these challenges by providing accessible and cost-effective conversational practice opportunities. The system will utilize Large Language Models (LLMs) embedded in embodied agents to facilitate language learning, specifically targeting Italian native speakers learning English. 
 
 ## :busts_in_silhouette: Team Members
-|              Name             |             Email                     |          Github profiles           |
-|:-----------------------------:|:-------------------------------------:|:----------------------------------:|
-| Andrea Federici               | andrea3.federici@mail.polimi.it       | [![][github-logo]][andrea-github]  |
-| Alireza Yahyanejad            | alireza.yahyanejad@mail.polimi.it     | [![][github-logo]][alireza-github] |
-| Mahdi Valadan                 | mohammadmahdi.valadan@mail.polimi.it  | [![][github-logo]][mahdi-github]   |
-| Paolo Pertino                 | paolo.pertino@mail.polimi.it          | [![][github-logo]][paolo-github]   |
-| Pietro Moroni                 | pietroguglielmo.moroni@mail.polimi.it | [![][github-logo]][pietro-github]  |
+|              Name             |               Email                     |                        Github profiles                             |
+|:-----------------------------:|:---------------------------------------:|:------------------------------------------------------------------:|
+| Andrea Federici               | <andrea3.federici@mail.polimi.it>       | [<img src="./assets/github_logo.png" width="50"/>][andrea-github]  |
+| Alireza Yahyanejad            | <alireza.yahyanejad@mail.polimi.it>     | [<img src="./assets/github_logo.png" width="50"/>][alireza-github] |
+| Mahdi Valadan                 | <mohammadmahdi.valadan@mail.polimi.it>  | [<img src="./assets/github_logo.png" width="50"/>][mahdi-github]   |
+| Paolo Pertino                 | <paolo.pertino@mail.polimi.it>          | [<img src="./assets/github_logo.png" width="50"/>][paolo-github]   |
+| Pietro Moroni                 | <pietroguglielmo.moroni@mail.polimi.it> | [<img src="./assets/github_logo.png" width="50"/>][pietro-github]  |
 
 
 <!-- Screenshots -->
@@ -169,7 +169,7 @@ NEXT_PUBLIC_SPEECH_REGION='westeurope'
 This project runs on a Node.js environment. Make sure you have Node.js installed on your machine. You can install it from [here][node-link].
 Moreover it uses `npm` as package manager. The application is built using `Next.js`. If you don't have `npm` installed, you can install it from [here][npm-link]. If you don't have `Next.js` installed, you can follow the installation instructions [here][next-link].
 
-Regarding the backend, it is built using `Python 3`. You can install it from [here][python-link]. 
+Regarding the backend, it is built using `Python 3`. You can install it from [here][python-link]. It uses `pip` packet manager. You can install it following the guide [here][pip-link].
 
 
 <!-- Installation -->
@@ -177,16 +177,16 @@ Regarding the backend, it is built using `Python 3`. You can install it from [he
 
 The full installation guide can be found in the wiki of the project.
 
-|                      Frontend installation                    |                      Backend installation                   |
-|:-------------------------------------------------------------:|:-----------------------------------------------------------:|
-| [![][frontend-installation-logo]][frontend-installation-link] | [![][backend-installation-logo]][backend-installation-link] |
+|                          Frontend installation                                    |                             Backend installation                               |
+|:---------------------------------------------------------------------------------:|:------------------------------------------------------------------------------:|
+| [<img src="./assets/frontend_icon.gif" width="100"/>][frontend-installation-link] | [<img src="./assets/python_icon.gif" width="100"/>][backend-installation-link] |
 
 <!-- Run Locally -->
 ### :running: Run Locally
 
 |                                   |                                                                             |
 |:---------------------------------:|:---------------------------------------------------------------------------:|
-| [![][running-logo]][running-link] | Find the instruction to run the project locally in the wiki of the project. |
+| [<img src="./assets/run_icon.gif" width="100"/>][running-link] | Find the instructions to run the project locally in the wiki of the project. |
 
 
 <!-- Deployment -->
@@ -207,10 +207,10 @@ The deployment of the project is not yet available.
 |        Text-to-speech         | Text-to-speech functionality for allowing the conversational partner to speak                                         |   ✅   |
 |   Viseme for facial position  | The artificial agent must look like an avatar and make reasonable mouth movements while talking according to visemes  |   ✅   |
 |   Post-conversation feedback  | Once a conversation has ended, the platform must provide feedback to students regarding the conversation itself       |   ✅   |
-|  Post-conversation challenges | The platform must provide additional challenges (synonmis, pronunciation, ...) to students once the conversation ends |   ✅   |
+|  Post-conversation challenges | The platform must provide additional challenges (synonyms, pronunciation, ...) to students once the conversation ends |   ✅   |
 |          Pilot-test           | Test the system and its functionalities with external people                                                          |   ❌   |
-|          Final report         | Write the final report of the project                                                                                   |   ❌   |
-|         Deployment           | Deploy the platform on a cloud service                                                                                   |   ❌   |
+|          Final report         | Write the final report of the project                                                                                 |   ❌   |
+|         Deployment           | Deploy the platform on a cloud service                                                                                 |   ❌   |
 > **_KEY:_** [✅]() Done [❌]() Not done yet
 
 <!-- FAQ -->
@@ -218,17 +218,17 @@ The deployment of the project is not yet available.
 
 - Which language models are used in the project?
 
-  + We leverage OpenAI's GPT-3.5 model for generating conversational responses. feedbacks and challenges. The chatbot structure has been defined using the Langchain library, so that other solutions can be easily integrated over the existing one in the future. 
+  + We leverage OpenAI's GPT-3.5 model for generating conversational responses. feedbacks and challenges. The chatbot structure has been defined using the Langchain library so that other solutions can be easily integrated over the existing one in the future. 
 
 - Why are the endpoints in the backend not properly secured?
 
-  + The project is a prototype and the focus was on the conversational agent and the interaction with the user. The backend is a simple Flask server that serves the frontend and handles the conversation with the OpenAI API and other conversation-related features. For a production-ready version, a more secure authentication system should be implemented to handle correctly both the user data and the privileges to perform certain requests.
+  + The project is a prototype and the focus was on the conversational agent and the interaction with the user. The backend is a simple Flask server that serves the front end and handles the conversation with the OpenAI API and other conversation-related features. For a production-ready version, a more secure authentication system should be implemented to handle correctly both the user data and the privileges to perform certain requests.
 
 <!-- Resources -->
 ## :books: Resources
-|          Code               |             Wiki            |             Report              | 
-|:---------------------------:|:---------------------------:|:-------------------------------:|
-| [![][code-logo]][code-link] | [![][wiki-logo]][wiki-link] | [![][report-logo]][report-link] |
+|                            Code                              |                                 Wiki                         |                                 Report                           | 
+|:------------------------------------------------------------:|:------------------------------------------------------------:|:----------------------------------------------------------------:|
+| [<img src="./assets/code_logo.gif" width="100"/>][code-link] | [<img src="./assets/wiki_logo.gif" width="100"/>][wiki-link] | [<img src="./assets/report_logo.gif" width="100"/>][report-link] |
 
 <!-- Contact -->
 ## :handshake: Contact
@@ -259,6 +259,7 @@ Project Link: [https://github.com/itsPeetah/polimi-mdproject-2024-teachme][proje
 [alireza-github]: https://github.com/yahyanejadalre
 [project-link]: https://github.com/itsPeetah/polimi-mdproject-2024-teachme
 [next-link]: https://nextjs.org/docs/getting-started/installation#automatic-installation
+[pip-link]: https://pip.pypa.io/en/stable/installation/
 [python-link]: https://www.python.org/downloads/
 [node-link]: https://nodejs.org/
 [npm-link]: https://docs.npmjs.com/downloading-and-installing-node-js-and-npm
