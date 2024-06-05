@@ -1,0 +1,102 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 0, 0, 0;
+  }
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))) rgb(var(--background-start-rgb));
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+@layer components {
+
+  /* Container */
+  .glass-container {
+    @apply w-11/12 md:w-5/6 p-10 rounded-xl backdrop-blur-md bg-slate-900/40;
+  }
+
+  /* Cards */
+  .conversation-card {
+    @apply flex flex-col items-center justify-center gap-4 w-60 h-52 nm-concave-fuchsia-800 hover:nm-convex-fuchsia-800 hover:scale-105 transition-all duration-200 ease-linear rounded-2xl;
+  }
+
+  .feedback-card {
+    @apply flex flex-col items-center justify-center gap-4 w-60 h-52 nm-concave-indigo-700 hover:nm-convex-indigo-700 hover:scale-105 transition-all duration-200 ease-linear rounded-2xl;
+  }
+
+  .student-card {
+    @apply flex items-center justify-center h-36 w-36 text-center rounded-full bg-sky-700 shadow-inner shadow-sky-600 hover:shadow-sky-300 transition-all duration-200 ease-linear;
+  }
+
+  /* Menu */
+  .side-menu {
+    @apply h-screen w-full lg:w-3/12 z-40 px-6 py-10 top-0 flex flex-col items-center border-l-2 border-slate-800 bg-slate-900/40 backdrop-blur-lg transition-all duration-300 ease-linear
+  }
+
+  /* Typography */
+  .header1 {
+    @apply font-display font-bold text-4xl sm:text-5xl text-center mb-12
+  }
+
+  .header2 {
+    @apply font-display font-bold text-3xl sm:text-4xl text-center mb-10
+  }
+
+  .header3 {
+    @apply font-display font-bold text-xl sm:text-2xl mb-6
+  }
+  .textLg {
+    @apply font-display font-bold text-2xl sm:text-3xl text-center mb-8
+  }
+
+  /* Buttons */
+  .side-menu-btn {
+    @apply sticky top-0 z-50 w-12 flex justify-center items-center h-screen text-white bg-slate-900/40 backdrop-blur-lg
+  }
+
+  .submit-btn {
+    @apply p-3 w-full rounded-lg text-white font-bold bg-sky-600 hover:bg-sky-500 transition duration-300 ease-in-out
+  }
+
+  .cancle-btn {
+    @apply p-3 w-full rounded-lg text-white text-center font-bold bg-pink-800 hover:bg-pink-700 transition duration-300 ease-in-out
+  }
+
+  .navigation-btn {
+    @apply px-6 py-4 bg-lime-600 rounded-full shadow-inner shadow-lime-500 transition-all hover:shadow-lime-200 hover:scale-105 font-bold text-center
+  }
+
+  .orange-btn {
+    @apply px-6 py-4 bg-orange-600 rounded-full shadow-inner shadow-orange-400 transition-all hover:shadow-orange-200 hover:scale-105 font-bold font-display text-xl text-center
+  }
+
+  .start-btn {
+    @apply flex justify-center items-center p-8 mt-20 aspect-square rounded-full bg-cyan-500 font-display font-bold text-2xl border border-cyan-400 shadow-inner shadow-cyan-300 transition-all duration-300 hover:shadow-cyan-100 hover:border-cyan-100
+  }
+
+  /* Inputs */
+  .form-input {
+    @apply p-3 bg-slate-800 rounded-lg shadow-inner shadow-slate-700 focus:outline-none focus:ring focus:border-blue-300 transition duration-300 ease-in-out
+  }
+}

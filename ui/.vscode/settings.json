@@ -1,0 +1,12 @@
+{
+    "tailwind-fold.foldStyle": "QUOTES",
+    "tailwind-fold.foldedText": "Tailwind",
+    "spellright.language": [
+        "en"
+    ],
+    "spellright.documentTypes": [
+        "markdown",
+        "latex",
+        "plaintext"
+    ]
+}
