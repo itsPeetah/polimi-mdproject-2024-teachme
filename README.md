@@ -61,6 +61,7 @@
 - [FAQ](#grey_question-faq)
 - [Resources](#books-resources)
 - [Contact](#handshake-contact)
+- [Acknowledgements](#gem-acknowledgements)
 
   
 
@@ -243,6 +244,8 @@ You can contact us by email. You can find all the information regarding our cont
 
 Project Link: [https://github.com/itsPeetah/polimi-mdproject-2024-teachme][project-link]
 
+## :gem: Acknowledgements
+All the animated icons used in this repository are provided by <a href="https://lordicon.com/">Lordicon.com</a>.
 
 <!-- Links -->
 [frontend-installation-logo]: ./assets/frontend_icon.gif
