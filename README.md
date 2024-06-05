@@ -199,7 +199,7 @@ The deployment of the project is not yet available.
 
 |         Feature name          |                                                    Description                                                        | Status |
 |:------------------------------|:----------------------------------------------------------------------------------------------------------------------|:------:|
-|    Registration and Login     | Users, students and teachers, must sign up and log in to the platform to use it                                       |   ✅   |
+|    Registration and Login     | Users, students and teachers, must sign up and log into the platform to use it                                       |   ✅   |
 | Teacher conversation creation | Teachers can create conversations specifying topic, difficulty, and length                                            |   ✅   |
 | Student and teacher dashboard | Students and teachers have a dashboard containing the conversations they created/have been assigned respectively      |   ✅   |
 |        Speech-to-text         | Speech-to-text functionality to transcribe the user's speech during the conversation                                  |   ✅   |
