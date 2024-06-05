@@ -124,7 +124,7 @@ def register_conversation_routes(
         """
         Handles user messages sent to the specified chatbot, through a POST request.
 
-        Request Parameters:
+        Request Body:
         * conversation_id (required, string): The unique identifier of the conversation.
         * sender_id (required, string): The unique identifier of the user who sends the message.
         * message (required, string): The text message sent by the user.
@@ -165,7 +165,17 @@ def register_conversation_routes(
 
     @app.route("/post-conversation-info/<conversation_id>", methods=["GET"])
     def post_conversation_info(conversation_id: str):
+        """
+        Retrieves the post-conversation feedbacks of the conversation with the specified id.
 
+        Args:
+            conversation_id (str): The ID of the conversation to get the feedbacks from.
+
+        Returns:
+            Response:
+                - JSON containing the post-conversation feedbacks of the specified conversation.
+                - 400 status code with an error message if the ID is invalid or the conversation does not exist.
+        """
         if type(conversation_id) != str or len(conversation_id) < 1:
             return make_response("Missing conversation ID", 400)
 
@@ -181,7 +191,17 @@ def register_conversation_routes(
 
     @app.route("/create-conversation-roles-reversed", methods=["POST"])
     def create_roles_reversed_conversation():
-        # Get conv id from request data
+        """
+        Create a new conversation with roles reversed based on an existing conversation.
+
+        Request Body:
+            - conversation_id (str): The ID of the existing conversation to base the new conversation on.
+
+        Returns:
+            Response:
+                - JSON containing the new conversation ID if the creation is successful.
+                - 400 status code with an error message if the conversation ID is missing, the original conversation does not exist, or the original conversation has not ended.
+        """
         data = request.get_json()
         conv_id = data.get("conversation_id")
         if conv_id is None:
@@ -208,7 +228,3 @@ def register_conversation_routes(
         )
 
         return jsonify({"conversation_id": str(conv_new._id)})
-
-    @app.route("/foochatbot", methods=["GET"])
-    def foo():
-        return make_response(str(len(cbm.chatbots)), 200)
