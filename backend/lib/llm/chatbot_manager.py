@@ -101,8 +101,8 @@ class ChatbotManager:
         with self.dict_lock:
             for cid, chatbot in self.chatbots.items():
                 if chatbot.is_idle:
-                    chatbot.deactivate()
-                    del self.chatbots[cid]
+                    _, _ = self.end_chatbot(cid=cid, db=chatbot.db,
+                                            logger=chatbot.logger)
 
     def get_chatbot(self, cid: str) -> ConversationalChatBot:
         """Get the chatbot for the specified conversation.

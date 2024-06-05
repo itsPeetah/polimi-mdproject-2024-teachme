@@ -41,8 +41,7 @@ def register_conversation_routes(
             time_limit = time_limit_temp
 
         conversations_collection = db.get_collection("conversations")
-        managed_conversations_collection = db.get_collection(
-            "managed_conversations")
+        managed_conversations_collection = db.get_collection("managed_conversations")
         conv = conversations_collection.create_conversation(
             user_level=user_level,
             difficulty=difficulty,
@@ -50,6 +49,7 @@ def register_conversation_routes(
             teacher_email=teacher_email,
             student_email=student_email,
             time_limit=time_limit,
+            parent_conversation_id=None,
         )
         managed_conversations_collection.create_managed_conversation(
             conversation_id=str(conv._id),
@@ -178,6 +178,36 @@ def register_conversation_routes(
 
         conversation_info._id = str(conversation_info._id)
         return make_response(jsonify(conversation_info), 200)
+
+    @app.route("/create-conversation-roles-reversed", methods=["POST"])
+    def create_roles_reversed_conversation():
+        # Get conv id from request data
+        data = request.get_json()
+        conv_id = data.get("conversation_id")
+        if conv_id is None:
+            return make_response("Missing conversation ID in request body", 400)
+        cc = db.get_collection("conversations")
+        conv_og = cc.find_by_id(conversation_id=conv_id)
+        if conv_og is None:
+            return make_response("The conversation does not exist.", 400)
+        if not conv_og.is_ended:
+            return make_response("The conversation has not ended yet.", 400)
+
+        mcc = db.get_collection("managed_conversations")
+        conv_new = cc.create_conversation(
+            user_level=conv_og.user_level,
+            difficulty=conv_og.difficulty,
+            topic=conv_og.topic,
+            teacher_email=conv_og.teacher_email,
+            student_email=conv_og.student_email,
+            time_limit=conv_og.time_limit,
+            parent_conversation_id=str(conv_og._id),
+        )
+        mcc.create_managed_conversation(
+            conversation_id=str(conv_new._id),
+        )
+
+        return jsonify({"conversation_id": str(conv_new._id)})
 
     @app.route("/foochatbot", methods=["GET"])
     def foo():

@@ -86,8 +86,7 @@ class PostConversationChatBot(BaseChatBot):
         prompt_template = ChatPromptTemplate.from_messages(
             [("system", system_prompt), ("user", "{user_message}")]
         )
-        prompt_template = prompt_template.invoke(
-            {"user_message": user_message})
+        prompt_template = prompt_template.invoke({"user_message": user_message})
         response = self._chat_base.invoke(prompt_template)
         # Extract choice
         response = response.content  # TODO We should validate the content :)
@@ -113,21 +112,29 @@ class PostConversationChatBot(BaseChatBot):
 
     def _do_overall_conversation_feedback(self, full_conversation: str):
         feedback = self._do_post_message_action(
-            get_prompt(
-                prompt_name="FINAL_FEEDBACK_SYSTEM_PROMPT"), full_conversation
+            get_prompt(prompt_name="FINAL_FEEDBACK_SYSTEM_PROMPT"), full_conversation
         )
         return feedback
+
+    def _do_user_opinion_summary(self, full_conversation: str):
+        summary = self._do_post_message_action(
+            get_roles_reversed_user_summary_prompt(), full_conversation
+        )
+        return summary
 
     def do_all_post_conversation_actions(self, user_message: str):
         synonyms = self._do_synonym_challenge(user_message)
         pronunciation = self._do_pronunciation_challenge(user_message)
         feedback = self._do_message_feedback(user_message)
-        # TODO Add roles reversed
         return synonyms, pronunciation, feedback
 
     def do_overall_conversation_feedback(self, full_conversation: str):
         feedback = self._do_overall_conversation_feedback(full_conversation)
         return feedback
+
+    def do_roles_reversed_challenge(self, full_conversation):
+        summary = self._do_user_opinion_summary(full_conversation)
+        return summary
 
 
 class ConversationalChatBot(BaseChatBot):
@@ -224,23 +231,34 @@ class ConversationalChatBot(BaseChatBot):
         Finally, it configures the chat session with the conversation ID.
 
         """
+
+        chat_system_prompt = get_prompt(
+            prompt_name="CONVERSATIONAL_SYSTEM_PROMPT",
+            user_level=self._conversation_user_level,
+            conversation_difficulty=self._conversation_difficulty,
+            conversation_topic=self._conversation_topic,
+        )
+
+        summary = self._get_parent_conversation_summary()
+        if summary is not None:
+            addendum = get_roles_reversed_system_prompt_addendum(summary)
+            chat_system_prompt += f"\n{addendum}"
+
         prompt = ChatPromptTemplate.from_messages(
             [
-                (
-                    "system",
-                    f"{get_prompt(prompt_name='CONVERSATIONAL_SYSTEM_PROMPT', user_level=self._conversation_user_level, conversation_difficulty=self._conversation_difficulty, conversation_topic=self._conversation_topic)}",
-                ),
+                ("system", chat_system_prompt),
                 MessagesPlaceholder(variable_name="history"),
                 ("human", "{answer}"),
-                MessagesPlaceholder(variable_name="agent_scratchpad"),
+                # MessagesPlaceholder(variable_name="agent_scratchpad"),
             ]
         )
-        tools = [self._create_end_conversation_tool()]
-        agent = create_openai_tools_agent(self._chat_base, tools, prompt)
-        agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=False)
+        _chat_with_history = prompt | self._chat_base
+        # tools = [self._create_end_conversation_tool()]
+        # agent = create_openai_tools_agent(self._chat_base, tools, prompt)
+        # agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=False)
 
         self._chat = RunnableWithMessageHistory(
-            agent_executor,
+            _chat_with_history,
             lambda session_id: MongoDBChatMessageHistory(
                 connection_string=self._db.db_connection_string,
                 session_id=session_id,
@@ -248,16 +266,14 @@ class ConversationalChatBot(BaseChatBot):
                 collection_name="chat_message_history",
             ),
             input_messages_key="answer",
-            output_messages_key="output",
+            # output_messages_key="output",
             history_messages_key="history",
         )
-        self._config = {"configurable": {
-            "session_id": f"{self._conversation_id}"}}
+        self._config = {"configurable": {"session_id": f"{self._conversation_id}"}}
 
     def _get_message_history(self, session_id: int) -> str:
         if self._db is None:
-            warnings.warn(
-                "No database connection provided. Returning empty string.")
+            warnings.warn("No database connection provided. Returning empty string.")
             return ""
 
         return (
@@ -293,7 +309,7 @@ class ConversationalChatBot(BaseChatBot):
         )
 
         chatbot_response = {
-            "output": response.get("output"),
+            "output": response.content,
             "is_chatbot_active": self._is_active,
         }
 
@@ -313,8 +329,8 @@ class ConversationalChatBot(BaseChatBot):
             self._conversation_id
         )
         final_feedback_thread = Thread(
-            target=self.set_overall_conversation_feedback,
-            args=[full_conversation_string]
+            target=self.set_overall_conversation_feedback_and_summary,
+            args=[full_conversation_string],
         )
         final_feedback_thread.start()
         self._is_active = False
@@ -384,7 +400,11 @@ class ConversationalChatBot(BaseChatBot):
 
         try:
             feed_json = json.loads(feedback)
-            if not isinstance(feed_json, dict) or "hasMistake" not in feed_json or "messageFeedback" not in feed_json:
+            if (
+                not isinstance(feed_json, dict)
+                or "hasMistake" not in feed_json
+                or "messageFeedback" not in feed_json
+            ):
                 feed_json = None
         except:
             feed_json = None
@@ -411,7 +431,9 @@ class ConversationalChatBot(BaseChatBot):
             },
         )
 
-    def set_overall_conversation_feedback(self, formatted_conversation_string: str) -> None:
+    def set_overall_conversation_feedback_and_summary(
+        self, formatted_conversation_string: str
+    ) -> None:
         """Sets the overall feedback for the conversation in the database, given the overall chat-history.
 
         :param formatted_conversation_string: overall formatted chat-history.
@@ -420,14 +442,27 @@ class ConversationalChatBot(BaseChatBot):
         feedback = self.post_conversation_chatbot.do_overall_conversation_feedback(
             full_conversation=formatted_conversation_string
         )
+        summary = self.post_conversation_chatbot.do_roles_reversed_challenge(
+            full_conversation=formatted_conversation_string
+        )
 
-        mc_collection = self._db.get_collection('managed_conversations')
+        mc_collection = self._db.get_collection("managed_conversations")
         mc_collection.set_overall_feedback(self.conversation_id, feedback)
+        mc_collection.set_user_opinion_summary(self.conversation_id, summary)
 
-    def get_post_conversation_info(self):
-        # TODO: get conversation info from db
-        # TODO: return conversation info
-        pass
+    def _get_parent_conversation_summary(self):
+        # Fetch conversation data
+        c_collection = self._db.get_collection("conversations")
+        conversation = c_collection.find_by_id(self.conversation_id)
+        if conversation is None or conversation.parent_conversation_id is None:
+            return None
+        # Fetch parent conversation data
+        mc_collection = self._db.get_collection("managed_conversations")
+        managed = mc_collection.get_by_id(conversation.parent_conversation_id)
+        if managed is None or managed.role_reversed_prompt is None:
+            return None
+        roles_reversed_summary = managed.role_reversed_prompt
+        return roles_reversed_summary
 
 
 def test_chatbot(
@@ -455,4 +490,4 @@ def test_chatbot(
     )
     while chatbot._is_active:
         bot_answer = chatbot.send_message(str(input("User message: ")))
-        print(f"Bot answer: {bot_answer.get('output')}")
+        print(f"Bot answer: {bot_answer['output']}")

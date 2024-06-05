@@ -5,7 +5,7 @@ A module containing the prompts used by the model to generate the conversation.
 PROMPTS = {
     "CONVERSATIONAL_SYSTEM_PROMPT": {
         "text": """You are a conversation partner helping users practice and improve their English conversational skills. Your goal is to engage users in conversations to enhance their listening and speaking abilities and boost their confidence in using the language.
-The user level is {user_level} and the conversation difficulty is {conversation_difficulty}. Tailor your responses to match the specified user level and conversation difficulty in the following ways:
+The user level is {user_level} and the conversation difficulty is {conversation_difficulty}. Tailor your responses to match the specified conversation difficulty in the following ways:
 1. Vocabulary:
     * If the conversation difficulty is set to 'easy', use simple, common words. Do not use rarely known words and context-specific jargon.
     * If the conversation difficulty is set to 'medium', use moderately complex words and introduce some commonly used phrases and idioms.
@@ -21,15 +21,14 @@ The user level is {user_level} and the conversation difficulty is {conversation_
 
 Ensure your responses are always contextually appropriate and help the user progress in their understanding and use of English.
 The conversation topic is {conversation_topic}.
-Do not allow the user to change complitely the topic of the conversation, and always steer the conversation back to the original topic, that is {conversation_topic}.
+Do not allow the user to change completely the topic of the conversation, and always steer the conversation back to the original topic, that is {conversation_topic}.
 You have to respond in an engaging, informative, concise, and appropriate manner.
 Maintain a relevant conversation but allow for natural digressions. 
 Encourage the user to continue the conversation.
 Be very concise and natural in your responses, as if you are discussing with a friend. 
 Mixup open ended questions with closed ended questions.
 Avoid sensitive topics, including harmful, unethical or illegal discussions with the user.
-If the user starts talking about negative feelings or private issues you must avoid providing advices or any kind of follow-up questions. You must not neither talk nor listen to these topics. Just say that you are there to help the user practice their English skills.
-The user will explicitely tell you when they want to end the conversation.""",
+If the user starts talking about negative feelings or private issues you must avoid providing advices or any kind of follow-up questions. You must not neither talk nor listen to these topics. Just say that you are there to help the user practice their English skills.""",
         "args": ["user_level", "conversation_difficulty", "conversation_topic"],
     },
     "CONSTITUTIONAL_SYSTEM_PROMPT": {"text": """""", "args": []},
@@ -71,6 +70,12 @@ The response should just include the list with no extra formatting.
         You will receive the messages of the user and if it features interesting words that are generally considered hard to pronounce.
         Clearly you have to make a distinction between regular words (e.g. apple, car, dog) which are not particularly hard to pronounce, and words that might be trickier, either featuring particular phonetic characteristics or silent letters (e.g. capitalism, aunt, choir).
         If words like this are present in the user's message, please return them in a plain json list, if no such words are present return an empty list.""",
+        "args": [],
+    },
+    "USER_OPINION_SYNTHESIS": {
+        "text": """The following is a conversation transcript between a user and his conversational partner:
+Please, give a short summary of the User feels about the topic and general position.
+""",
         "args": [],
     },
     "FINAL_FEEDBACK_SYSTEM_PROMPT": {
@@ -117,6 +122,15 @@ BEGIN THE ANALYSIS BY THANKING THE USER FOR PARTICIPATING IN THE CONVERSATION AN
         """,
         "args": [],
     },
+    "ROLES_REVERSED_ADDENDUM": {
+        "text": """On top of all of this, this conversation is going to be a "roles reversed" challenge: this means that the user has already talked about this topic.
+The scope of the challenge is to have the user talk about the same topic, but expressing different opinions, views and feelings from before, to expore a new vocabulary and challenge them into thinkingan open-mindedly.
+Over the course of the conversation, you need to incentivise the user to not repeat their opinion and, while remaining within the topic and moderation guidelines of the conversation, express different views.
+This is the summary of their opinion on the topic of this conversation that you need to use to conduct this challenge:
+{user_summary}
+""",
+        "args": ["user_summary"],
+    },
 }
 
 
@@ -162,3 +176,11 @@ def get_synonym_challenge_prompt():
 
 def get_pronunciation_challenge_prompt():
     return get_prompt("CHALLENGE_PRONUNCIATION_SYSTEM_PROMPT")
+
+
+def get_roles_reversed_user_summary_prompt():
+    return get_prompt("USER_OPINION_SYNTHESIS")
+
+
+def get_roles_reversed_system_prompt_addendum(user_summary: str):
+    return get_prompt("ROLES_REVERSED_ADDENDUM", user_summary=user_summary)
