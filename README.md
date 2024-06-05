@@ -33,7 +33,7 @@
 <h4>
     <a href="https://github.com/itsPeetah/polimi-mdproject-2024-teachme/">View Demo</a>
   <span> · </span>
-    <a href="https://github.com/itsPeetah/TasteIt/blob/main/documentation/tasteit_report.pdf">Documentation</a>
+    <a href="https://github.com/itsPeetah/polimi-mdproject-2024-teachme/wiki">Documentation</a> <!-- TODO: Update with deliverables folder when ready -->
   <span> · </span>
     <a href="https://github.com/itsPeetah/polimi-mdproject-2024-teachme/wiki">Wiki</a>
   <span> · </span>
@@ -57,10 +57,9 @@
   * [Installation](#gear-installation)
   * [Run Locally](#running-run-locally)
   * [Deployment](#triangular_flag_on_post-deployment)
-- [Usage](#eyes-usage)
 - [Roadmap](#compass-roadmap)
 - [FAQ](#grey_question-faq)
-- [License](#warning-license)
+- [Resources](#books-resources)
 - [Contact](#handshake-contact)
 
   
@@ -72,13 +71,13 @@ Second language acquisition (SLA) is a complex process influenced by several fac
 TEACHme aims to address these challenges by providing accessible and cost-effective conversational practice opportunities. The system will utilize Large Language Models (LLMs) embedded in embodied agents to facilitate language learning, specifically targeting Italian native speakers learning English. 
 
 ## :busts_in_silhouette: Team Members
-|              Name             |             Email                 |
-|:-----------------------------:|:---------------------------------:|
-| Andrea Federici               | andrea.federici@mail.polimi.it    |
-| Alireza Yahyanejad            | alireza.yahyanejad@mail.polimi.it | 
-| Mahdi Valadan                 | mahdi.valadan@mail.polimi.it      |
-| Paolo Pertino                 | paolo.pertino@mail.polimi.it      |
-| Pietro Moroni                 | pietro.moroni@mail.polimi.it      |
+|              Name             |             Email                     |          Github profiles           |
+|:-----------------------------:|:-------------------------------------:|:----------------------------------:|
+| Andrea Federici               | andrea3.federici@mail.polimi.it       | [![][github-logo]][andrea-github]  |
+| Alireza Yahyanejad            | alireza.yahyanejad@mail.polimi.it     | [![][github-logo]][alireza-github] |
+| Mahdi Valadan                 | mohammadmahdi.valadan@mail.polimi.it  | [![][github-logo]][mahdi-github]   |
+| Paolo Pertino                 | paolo.pertino@mail.polimi.it          | [![][github-logo]][paolo-github]   |
+| Pietro Moroni                 | pietroguglielmo.moroni@mail.polimi.it | [![][github-logo]][pietro-github]  |
 
 
 <!-- Screenshots -->
@@ -167,74 +166,33 @@ NEXT_PUBLIC_SPEECH_REGION='westeurope'
 
 <!-- Prerequisites -->
 ### :bangbang: Prerequisites
+This project runs on a Node.js environment. Make sure you have Node.js installed on your machine. You can install it from [here][node-link].
+Moreover it uses `npm` as package manager. The application is built using `Next.js`. If you don't have `npm` installed, you can install it from [here][npm-link]. If you don't have `Next.js` installed, you can follow the installation instructions [here][next-link].
 
-This project uses Yarn as package manager
+Regarding the backend, it is built using `Python 3`. You can install it from [here][python-link]. 
 
-```bash
- npm install --global yarn
-```
 
 <!-- Installation -->
 ### :gear: Installation
 
-Install my-project with npm
+The full installation guide can be found in the wiki of the project.
 
-```bash
-  yarn install my-project
-  cd my-project
-```
+|                      Frontend installation                    |                      Backend installation                   |
+|:-------------------------------------------------------------:|:-----------------------------------------------------------:|
+| [![][frontend-installation-logo]][frontend-installation-link] | [![][backend-installation-logo]][backend-installation-link] |
 
 <!-- Run Locally -->
 ### :running: Run Locally
 
-Clone the project
-
-```bash
-  git clone https://github.com/Louis3797/awesome-readme-template.git
-```
-
-Go to the project directory
-
-```bash
-  cd my-project
-```
-
-Install dependencies
-
-```bash
-  yarn install
-```
-
-Start the server
-
-```bash
-  yarn start
-```
+|                                   |                                                                             |
+|:---------------------------------:|:---------------------------------------------------------------------------:|
+| [![][running-logo]][running-link] | Find the instruction to run the project locally in the wiki of the project. |
 
 
 <!-- Deployment -->
 ### :triangular_flag_on_post: Deployment
 
-To deploy this project run
-
-```bash
-  yarn deploy
-```
-
-
-<!-- Usage -->
-## :eyes: Usage
-
-Use this space to tell a little more about your project and how it can be used. Show additional screenshots, code samples, demos or link to other resources.
-
-
-```javascript
-import Component from 'my-project'
-
-function App() {
-  return <Component />
-}
-```
+The deployment of the project is not yet available. 
 
 <!-- Roadmap -->
 ## :compass: Roadmap
@@ -251,6 +209,8 @@ function App() {
 |   Post-conversation feedback  | Once a conversation has ended, the platform must provide feedback to students regarding the conversation itself       |   ✅   |
 |  Post-conversation challenges | The platform must provide additional challenges (synonmis, pronunciation, ...) to students once the conversation ends |   ✅   |
 |          Pilot-test           | Test the system and its functionalities with external people                                                          |   ❌   |
+|          Final report         | Write the final report of the project                                                                                   |   ❌   |
+|         Deployment           | Deploy the platform on a cloud service                                                                                   |   ❌   |
 > **_KEY:_** [✅]() Done [❌]() Not done yet
 
 <!-- FAQ -->
@@ -264,9 +224,41 @@ function App() {
 
   + The project is a prototype and the focus was on the conversational agent and the interaction with the user. The backend is a simple Flask server that serves the frontend and handles the conversation with the OpenAI API and other conversation-related features. For a production-ready version, a more secure authentication system should be implemented to handle correctly both the user data and the privileges to perform certain requests.
 
+<!-- Resources -->
+## :books: Resources
+|          Code               |             Wiki            |             Report              | 
+|:---------------------------:|:---------------------------:|:-------------------------------:|
+| [![][code-logo]][code-link] | [![][wiki-logo]][wiki-link] | [![][report-logo]][report-link] |
+
 <!-- Contact -->
 ## :handshake: Contact
 
 You can contact us by email. You can find all the information regarding our contacts in the [:busts_in_silhouette: Team Members](#busts_in_silhouette-team-members) section.
 
-Project Link: [https://github.com/itsPeetah/polimi-mdproject-2024-teachme](https://github.com/itsPeetah/polimi-mdproject-2024-teachme)
+Project Link: [https://github.com/itsPeetah/polimi-mdproject-2024-teachme][project-link]
+
+
+<!-- Links -->
+[frontend-installation-logo]: ./assets/frontend_icon.gif
+[frontend-installation-link]: https://github.com/itsPeetah/polimi-mdproject-2024-teachme/wiki/Installation#front-end
+[backend-installation-logo]: ./assets/python_icon.gif
+[backend-installation-link]: https://github.com/itsPeetah/polimi-mdproject-2024-teachme/wiki/Installation#back-end
+[running-logo]: ./assets/run_icon.gif
+[running-link]: https://github.com/itsPeetah/polimi-mdproject-2024-teachme/wiki/Running
+[report-logo]: ./assets/report_logo.gif
+[report-link]: https://www.google.com/
+[wiki-logo]: ./assets/wiki_logo.gif
+[wiki-link]: https://github.com/itsPeetah/polimi-mdproject-2024-teachme/wiki/
+[code-logo]: ./assets/code_logo.gif
+[code-link]: https://github.com/itsPeetah/polimi-mdproject-2024-teachme
+[github-logo]: ./assets/github_logo.png
+[paolo-github]: https://github.com/paolopertino
+[andrea-github]: https://github.com/andrea-federici
+[pietro-github]: https://github.com/itsPeetah
+[mahdi-github]: https://github.com/MahdiValadan
+[alireza-github]: https://github.com/yahyanejadalre
+[project-link]: https://github.com/itsPeetah/polimi-mdproject-2024-teachme
+[next-link]: https://nextjs.org/docs/getting-started/installation#automatic-installation
+[python-link]: https://www.python.org/downloads/
+[node-link]: https://nodejs.org/
+[npm-link]: https://docs.npmjs.com/downloading-and-installing-node-js-and-npm
