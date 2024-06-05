@@ -55,7 +55,7 @@
 - [Getting Started](#toolbox-getting-started)
   * [Prerequisites](#bangbang-prerequisites)
   * [Installation](#gear-installation)
-  * [Run Locally](#running-run-locally)
+  * [Run Locally](#rocket-run-locally)
   * [Deployment](#triangular_flag_on_post-deployment)
 - [Roadmap](#compass-roadmap)
 - [FAQ](#grey_question-faq)
@@ -182,7 +182,7 @@ The full installation guide can be found in the wiki of the project.
 | [<img src="./assets/frontend_icon.gif" width="100"/>][frontend-installation-link] | [<img src="./assets/python_icon.gif" width="100"/>][backend-installation-link] |
 
 <!-- Run Locally -->
-### :running: Run Locally
+### :rocket: Run Locally
 
 |                                   |                                                                             |
 |:---------------------------------:|:---------------------------------------------------------------------------:|
