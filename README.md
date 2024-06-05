@@ -216,13 +216,19 @@ The deployment of the project is not yet available.
 <!-- FAQ -->
 ## :grey_question: FAQ
 
-- Which language models are used in the project?
+<details>
+  <summary>Which language models are used in the project?</summary>
+  <ul>
+    <li>We leverage OpenAI's GPT-3.5 model for generating conversational responses. feedbacks and challenges. The chatbot structure has been defined using the Langchain library so that other solutions can be easily integrated over the existing one in the future. </li>
+  </ul>
+</details>
 
-  + We leverage OpenAI's GPT-3.5 model for generating conversational responses. feedbacks and challenges. The chatbot structure has been defined using the Langchain library so that other solutions can be easily integrated over the existing one in the future. 
-
-- Why are the endpoints in the backend not properly secured?
-
-  + The project is a prototype and the focus was on the conversational agent and the interaction with the user. The backend is a simple Flask server that serves the front end and handles the conversation with the OpenAI API and other conversation-related features. For a production-ready version, a more secure authentication system should be implemented to handle correctly both the user data and the privileges to perform certain requests.
+<details>
+  <summary>Why are the endpoints in the backend not properly secured?</summary>
+  <ul>
+    <li>The project is a prototype and the focus was on the conversational agent and the interaction with the user. The backend is a simple Flask server that serves the front end and handles the conversation with the OpenAI API and other conversation-related features. For a production-ready version, a more secure authentication system should be implemented to handle correctly both the user data and the privileges to perform certain requests. </li>
+  </ul>
+</details>
 
 <!-- Resources -->
 ## :books: Resources
