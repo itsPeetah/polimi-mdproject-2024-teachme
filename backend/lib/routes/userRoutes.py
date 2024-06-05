@@ -55,12 +55,17 @@ def register_user_routes(app: Flask, db: MongoDB, logger: Logger):
 
     @app.route("/get-username/<user_email>", methods=["GET"])
     def get_username(user_email: str):
-        """Endpoint to get the username and friends of a user by their email.
+        """
+        Get the username and friends of a user by their email.
 
-        :param user_email: The email of the user.
-        :type user_email: str
-        :return: The username and friends of the user.
-        :rtype: Response
+        Args:
+            user_email (str): The email of the user.
+
+        Returns:
+            Response:
+                - JSON containing the username and friends of the user if the request is successful.
+                - 400 status code with an error message if the email is missing or the user does not exist.
+
         """
         user_data_collection = db.get_collection("user_data")
         user = user_data_collection.retrieve_by_email(user_email)
