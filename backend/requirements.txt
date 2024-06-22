@@ -1,10 +1,11 @@
 Flask
+flask-cors
 langchain
-langchain_community
 langchain_core
+langchain_community
 langchain_mongodb
 langchain_openai
 protobuf
 python-dotenv
 pymongo
-flask-cors
+numpy
