@@ -127,18 +127,15 @@ class ChatbotManager:
                                             logger=chatbot.logger)
 
     def get_chatbot(self, cid: str) -> ConversationalChatBot:
-        def get_chatbot(self, cid: str) -> ConversationalChatBot:
-            """
-            Get the chatbot for the specified conversation.
+        """
+        Get the chatbot for the specified conversation.
 
-            Args:
-            cid (str): id of the conversation
+        Args:
+        cid (str): id of the conversation
 
-            Returns:
-            ConversationalChatBot: Returns the chatbot for the specified conversation or None if the conversation is not initialized.
-            """
-            with self.dict_lock:
-                return self.chatbots.get(cid, None)
+        Returns:
+        ConversationalChatBot: Returns the chatbot for the specified conversation or None if the conversation is not initialized.
+        """
         with self.dict_lock:
             return self.chatbots.get(cid, None)
 
