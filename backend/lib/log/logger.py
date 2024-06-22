@@ -6,4 +6,13 @@ class Logger():
         self._logs = db.get_collection("logs")
     
     def log(self, log: Log):
-        self._logs.insert_one(log_type = log.log_type, message = log.message, time_stamp = log.time_stamp)
+        """
+        Logs a given log entry.
+
+        Args:
+            log (Log): The log entry to be logged.
+
+        Returns:
+            None
+        """
+        self._logs.insert_one(log_type=log.log_type, message=log.message, time_stamp=log.time_stamp)
