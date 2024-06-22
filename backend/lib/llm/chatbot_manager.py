@@ -154,36 +154,24 @@ class ChatbotManager:
             self.chatbots[cid] = chatbot
 
     def send_message_to_chatbot(self, cid: str, message: str) -> tuple[int, str]:
-        def send_message_to_chatbot(self, cid: str, message: str) -> tuple[int, str]:
-            """
-            Send a message to the chatbot in the specified conversation.
+        """
+        Send a message to the chatbot in the specified conversation.
 
-            Args:
-                cid (str): id of the conversation in which the message is sent
-                message (str): the message to send to the chatbot coming from the user
+        Args:
+            cid (str): id of the conversation in which the message is sent
+            message (str): the message to send to the chatbot coming from the user
 
-            Returns:
-                tuple[int, str]: Returns a tuple containing the status code and the response message.
-                The response message is the chatbot's response to the user message or an error
-                message in case the conversation is not initialized.
-            """
-            chatbot = self.get_chatbot(cid)
-            if chatbot is None:
-                return (
-                    400,
-                    "Chatbot not initialized. Before sending messages, you must initialize the conversation. See /initialize-conversation.",
-                )
-            response = chatbot.send_message(message)
-            response_message = response["output"]
-            return 200, response_message
+        Returns:
+            tuple[int, str]: Returns a tuple containing the status code and the response message.
+            The response message is the chatbot's response to the user message or an error
+            message in case the conversation is not initialized.
+        """
         chatbot = self.get_chatbot(cid)
-
         if chatbot is None:
             return (
                 400,
                 "Chatbot not initialized. Before sending messages, you must initialize the conversation. See /initialize-conversation.",
             )
-
         response = chatbot.send_message(message)
         response_message = response["output"]
         return 200, response_message
