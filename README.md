@@ -53,7 +53,8 @@
   * [Features](#dart-features)
   * [Environment Variables](#key-environment-variables)
 - [Getting Started](#toolbox-getting-started)
-  * [Prerequisites](#bangbang-prerequisites)
+  * [Installation with Docker](#whale-installation-with-docker)
+  * [Prerequisites](#️bangbang-prerequisites-no-docker)
   * [Installation](#gear-installation)
   * [Run Locally](#rocket-run-locally)
   * [Deployment](#triangular_flag_on_post-deployment)
@@ -165,8 +166,13 @@ NEXT_PUBLIC_SPEECH_REGION='westeurope'
 <!-- Getting Started -->
 ## 	:toolbox: Getting Started
 
+### :whale: Installation with Docker
+In order to install the project using `Docker`, you must have Docker and Docker Compose installed on your machine. You can find the installation instructions [here][docker-link]. Additionaly, you need to install `docker-compose` in order to run the project. You can find the installation instructions [here][docker-compose-link].
+
+Once Docker and docker-compose are set up, follow the instructions in the wiki of the project to install the project using Docker.
+
 <!-- Prerequisites -->
-### :bangbang: Prerequisites
+### :bangbang: Prerequisites (no docker)
 This project runs on a Node.js environment. Make sure you have Node.js installed on your machine. You can install it from [here][node-link].
 Moreover it uses `npm` as package manager. The application is built using `Next.js`. If you don't have `npm` installed, you can install it from [here][npm-link]. If you don't have `Next.js` installed, you can follow the installation instructions [here][next-link].
 
@@ -178,9 +184,9 @@ Regarding the backend, it is built using `Python 3`. You can install it from [he
 
 The full installation guide can be found in the wiki of the project.
 
-|                          Frontend installation                                    |                             Backend installation                               |
-|:---------------------------------------------------------------------------------:|:------------------------------------------------------------------------------:|
-| [<img src="./assets/frontend_icon.gif" width="100"/>][frontend-installation-link] | [<img src="./assets/python_icon.gif" width="100"/>][backend-installation-link] |
+|                          Frontend installation                                    |                             Backend installation                               |                             Docker installation                               |
+|:---------------------------------------------------------------------------------:|:------------------------------------------------------------------------------:|:------------------------------------------------------------------------------:|
+| [<img src="./assets/frontend_icon.gif" width="100"/>][frontend-installation-link] | [<img src="./assets/python_icon.gif" width="100"/>][backend-installation-link] | [<img src="./assets/docker_icon.gif" width="100"/>][docker-installation-link] |
 
 <!-- Run Locally -->
 ### :rocket: Run Locally
@@ -272,3 +278,6 @@ All the animated icons used in this repository are provided by <a href="https://
 [python-link]: https://www.python.org/downloads/
 [node-link]: https://nodejs.org/
 [npm-link]: https://docs.npmjs.com/downloading-and-installing-node-js-and-npm
+[docker-link]: https://docs.docker.com/get-docker/
+[docker-compose-link]: https://docs.docker.com/compose/install/
+[docker-installation-link]: https://github.com/itsPeetah/polimi-mdproject-2024-teachme/wiki/Installation#using-docker
