@@ -18,8 +18,11 @@ class Connector:
         """
         Initialize a Connector object.
 
-        :param key: connection key, defaults to None
-        :type key: str, optional
+        Args:
+            key (str, optional): Connection key.
+
+        Raises:
+            ConnectionError: If connection to the database fails.
         """
         pass
 
@@ -52,9 +55,11 @@ class MongoDBConnector(Connector):
         """
         Initialize a MongoDBConnector object.
 
-        :param key: connection key, defaults to None
-        :type key: str, optional
-        :raises ConnectionError: if connection to the database fails
+        Args:
+            key (str, optional): Connection key. Defaults to None.
+
+        Raises:
+            ConnectionError: If connection to the database fails.
         """
         self._key = key
         self._client = MongoClient(self._key)
@@ -66,12 +71,13 @@ class MongoDBConnector(Connector):
 
     def connect(self, db_name: str = "teachme_main") -> MongoDB:
         """
-        Connect to the MongoDB database.
+        Connects to the MongoDB database.
 
-        :param db_name: name of the database, defaults to 'teachme_main'
-        :type db_name: str, optional
-        :return: MongoDB object representing the connected database
-        :rtype: MongoDB
+        Args:
+            db_name (str, optional): Name of the database. Defaults to 'teachme_main'.
+
+        Returns:
+            MongoDB: MongoDB object representing the connected database.
         """
         return MongoDB(self._client, db_name, connection_string=self._key)
 

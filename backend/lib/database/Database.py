@@ -30,11 +30,12 @@ class MongoDB(Database):
         """
         Initialize a MongoDB object.
 
-        :param client: the MongoDB client object
-        :type client: any
-        :param db_name: name of the database, defaults to 'teachme_main'
-        :type db_name: str, optional
-        :raises ConnectionError: if connection to the database fails
+        Args:
+            client (any): The MongoDB client object.
+            db_name (str, optional): Name of the database. Defaults to 'teachme_main'.
+
+        Raises:
+            ConnectionError: If connection to the database fails.
         """
         self._db_name = db_name
         self._connection_string = connection_string
@@ -61,9 +62,10 @@ class MongoDB(Database):
         """
         Return the collection object for the given collection name.
 
-        :param collection_name: name of the collection to be returned
-        :type collection_name: str
-        :return: the collection object
-        :rtype: Collection
+        Args:
+            collection_name (str): Name of the collection to be returned.
+
+        Returns:
+            Collection: The collection object.
         """
         return self._collection_dispatcher.get_collection(collection_name)
