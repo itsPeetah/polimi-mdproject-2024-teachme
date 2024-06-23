@@ -1,19 +1,31 @@
+# Use the official Node.js image as the base image
 FROM node:18-alpine
 
-# Set up environment variables for TeachMe Frontend
-ENV NEXT_PUBLIC_SPEECH_KEY=${AZURE_KEY}
-ENV NEXT_PUBLIC_SPEECH_REGION='westeurope'
-
+# Set the working directory inside the container
 WORKDIR /app
-ENV PATH /app/node_modules/.bin:$PATH
-ENV NODE_ENV production
 
-# install and cache app dependencies
+# Ensure local binaries are available in PATH
+ENV PATH /app/node_modules/.bin:$PATH
+
+# Copy package.json and package-lock.json to the working directory
+COPY package.json package-lock.json ./
+
+# Install dependencies
+RUN npm install
+
+RUN npm i sharp
+
+# Debug step to check if node_modules contains Next.js
+RUN ls -la node_modules/next
+
+# Copy the rest of the application code to the working directory
 COPY . .
 
-RUN npm install
-# RUN npm run build
+# Build the Next.js application
+RUN npm run build
 
+# Expose the port that the Next.js app will run on
 EXPOSE 3000
 
-CMD ["npm", "run", "dev"]
+# Specify the command to run the application
+CMD ["npm", "start"]

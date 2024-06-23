@@ -1,13 +1,5 @@
 FROM python:3.11-alpine
 
-# Set up environment variables for Python
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
-
-# Set up backend variables for TeachMe
-# ENV OPENAI_API_KEY=<YOUR_OPENAI_KEY>
-# ENV MONGODB_URI=<YOUR_MONGODB_URI>
-
 # Create and set the working directory
 WORKDIR /app
 
