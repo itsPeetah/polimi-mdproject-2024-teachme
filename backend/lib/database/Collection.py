@@ -21,10 +21,9 @@ class Collection:
         """
         Initialize a Collection object.
 
-        :param collection: the collection object from the database
-        :type collection: any
-        :param collection_name: name of the collection
-        :type collection_name: str
+        Args:
+            collection (any): The collection object from the database.
+            collection_name (str): The name of the collection.
         """
         self._collection = collection
         self._collection_name = collection_name
@@ -34,8 +33,11 @@ class Collection:
         """
         Get the name of the collection.
 
-        :return: the name of the collection
-        :rtype: str
+        Args:
+            None
+
+        Returns:
+            str: The name of the collection.
         """
         return self._collection_name
 
@@ -59,10 +61,9 @@ class ConversationsCollection(Collection):
         """
         Initialize a ConversationsCollection object.
 
-        :param collection: the collection object from the database
-        :type collection: any
-        :param collection_name: name of the collection
-        :type collection_name: str
+        Args:
+            collection (any): The collection object from the database.
+            collection_name (str): The name of the collection.
         """
         super().__init__(collection, collection_name)
 
@@ -70,10 +71,11 @@ class ConversationsCollection(Collection):
         """
         Find a conversation by its ID.
 
-        :param conversation_id: ID of the conversation to find
-        :type conversation_id: str
-        :return: the conversation object
-        :rtype: Conversation
+        Args:
+            conversation_id (str): ID of the conversation to find
+
+        Returns:
+            Conversation: The conversation object
         """
         conversation_to_return = self._collection.find_one(
             {"_id": ObjectId(conversation_id)}
@@ -186,20 +188,24 @@ class UserDataCollection(Collection):
         """
         Initialize a UserDataCollection object.
 
-        :param collection: the collection object from the database
-        :type collection: any
-        :param collection_name: name of the collection
-        :type collection_name: str
+        Args:
+            collection (any): the collection object from the database
+            collection_name (str): name of the collection
+
+        Returns:
+            None
         """
         super().__init__(collection, collection_name)
 
     def register(self, user: User) -> User:
-        """Register a new user in the database.
+        """
+        Register a new user in the database.
 
-        :param user: the user object to be registered
-        :type user: User
-        :return: the registered user object
-        :rtype: User
+        Args:
+            user (User): The user object to be registered.
+
+        Returns:
+            User: The registered user object.
         """
         self._collection.insert_one(user.__dict__)
         return user
@@ -408,10 +414,9 @@ class ChatMessageHistoryCollection(Collection):
         """
         Initialize a ChatMessageHistoryCollection object.
 
-        :param collection: the collection object from the database
-        :type collection: any
-        :param collection_name: name of the collection
-        :type collection_name: str
+        Args:
+            collection (any): the collection object from the database
+            collection_name (str): name of the collection
         """
         super().__init__(collection, collection_name)
 
@@ -425,10 +430,12 @@ class LogsCollection(Collection):
         """
         Initialize a LogsCollection object.
 
-        :param collection: the collection object from the database
-        :type collection: any
-        :param collection_name: name of the collection
-        :type collection_name: str
+        Args:
+            collection (any): the collection object from the database
+            collection_name (str): name of the collection
+
+        Returns:
+            None
         """
         super().__init__(collection, collection_name)
 
@@ -442,12 +449,13 @@ class LogsCollection(Collection):
         """
         Insert a new conversation into the collection.
 
-        :param log_type: type of the log
-        :type log_type: LogType
-        :param message: message of the log
-        :type message: str
-        :param time_stamp: timestamp of the log
-        :type time_stamp: datetime
+        Args:
+            log_type (LogType): Type of the log.
+            message (str): Message of the log.
+            time_stamp (datetime): Timestamp of the log.
+
+        Returns:
+            None
         """
         log = {
             "log_type": log_type.value,
@@ -466,10 +474,12 @@ class ManagedConversationsCollection(Collection):
         """
         Initialize a EndedConversationsCollection object.
 
-        :param collection: the collection object from the database
-        :type collection: any
-        :param collection_name: name of the collection
-        :type collection_name: str
+        Args:
+            collection (any): The collection object from the database.
+            collection_name (str): The name of the collection.
+
+        Returns:
+            None
         """
         super().__init__(collection, collection_name)
 
@@ -480,23 +490,19 @@ class ManagedConversationsCollection(Collection):
         reversed_role_prompt: str = None,
         overall_feedback: str = None,
     ) -> ManagedConversation:
-        """Creates a new managed conversation in the database.
+        """
+        Creates a new managed conversation in the database.
 
-        A managed conversation is a structured conversation object that keeps
-        track of the messages exchanged between the user and the chatbot.
-        The user messages are stored with additional information for post
-        conversation analysis.
+        A managed conversation is a structured conversation object that keeps track of the messages exchanged between the user and the chatbot. The user messages are stored with additional information for post conversation analysis.
 
-        :param conversation_id: id of the conversation. Equal to the conversation id in the conversations collection.
-        :type conversation_id: str
-        :param messages: list of messages exchanged between the user and the chatbot.
-        :type messages: list
-        :param reversed_role_prompt: the prompt for the reversed role challenge conversation.
-        :type reversed_role_prompt: str
-        :param overall_feedback: the overall feedback for the conversation.
-        :type overall_feedback: str
-        :return: the managed conversation object created in the database.
-        :rtype: ManagedConversation
+        Args:
+            conversation_id (str): ID of the conversation. Equal to the conversation id in the conversations collection.
+            messages (list, optional): List of messages exchanged between the user and the chatbot. Defaults to None.
+            reversed_role_prompt (str, optional): The prompt for the reversed role challenge conversation. Defaults to None.
+            overall_feedback (str, optional): The overall feedback for the conversation. Defaults to None.
+
+        Returns:
+            ManagedConversation: The managed conversation object created in the database.
         """
         managed_conversation_object = {
             "_id": ObjectId(conversation_id),
@@ -512,12 +518,15 @@ class ManagedConversationsCollection(Collection):
         return ManagedConversation(**managed_conversation_object)
 
     def add_message(self, conversation_id: str, message: dict) -> None:
-        """Add a message to the managed conversation.
+        """
+        Add a message to the managed conversation.
 
-        :param conversation_id: id of the conversation. Equal to the conversation id in the conversations collection.
-        :type conversation_id: str
-        :param message: the message to add to the conversation.
-        :type message: dict
+        Args:
+            conversation_id (str): ID of the conversation. Equal to the conversation id in the conversations collection.
+            message (dict): The message to add to the conversation.
+
+        Returns:
+            None
         """
         try:
             self._collection.update_one(
@@ -527,12 +536,15 @@ class ManagedConversationsCollection(Collection):
             print(f"Conversation with id {conversation_id} not found.")
 
     def get_by_id(self, conversation_id: str) -> ManagedConversation:
-        """Retrieve a managed conversation by its ID.
+        """
+        Retrieve a managed conversation by its ID.
 
-        :param conversation_id: id of the conversation. Equal to the conversation id in the conversations collection.
-        :type conversation_id: str
-        :return: the managed conversation object
-        :rtype: ManagedConversation
+        Args:
+            conversation_id (str): ID of the conversation. Equal to the conversation id in the conversations collection.
+
+        Returns:
+            ManagedConversation: The managed conversation object.
+
         """
         managed_conversation = self._collection.find_one(
             {"_id": ObjectId(conversation_id)}
@@ -544,12 +556,14 @@ class ManagedConversationsCollection(Collection):
         )
 
     def get_formatted_conversation_string(self, conversation_id: str) -> str:
-        """Retrieve the formatted conversation string for the given conversation ID.
+        """
+        Retrieve the formatted conversation string for the given conversation ID.
 
-        :param conversation_id: id of the conversation. Equal to the conversation id in the conversations collection.
-        :type conversation_id: str
-        :return: the formatted conversation string
-        :rtype: str
+        Args:
+            conversation_id (str): ID of the conversation. Equal to the conversation id in the conversations collection.
+
+        Returns:
+            str: The formatted conversation string.
         """
         managed_conversation = self.get_by_id(conversation_id)
         if managed_conversation is None:
@@ -566,12 +580,15 @@ class ManagedConversationsCollection(Collection):
         return conversation_string
 
     def set_overall_feedback(self, conversation_id: str, overall_feedback: str) -> None:
-        """Set the overall feedback for the conversation.
+        """
+        Set the overall feedback for the conversation.
 
-        :param conversation_id: id of the conversation. Equal to the conversation id in the conversations collection.
-        :type conversation_id: str
-        :param overall_feedback: the overall feedback for the conversation.
-        :type overall_feedback: str
+        Args:
+            conversation_id (str): ID of the conversation. Equal to the conversation id in the conversations collection.
+            overall_feedback (str): The overall feedback for the conversation.
+
+        Returns:
+            None
         """
         self._collection.update_one(
             {"_id": ObjectId(conversation_id)},
@@ -579,12 +596,15 @@ class ManagedConversationsCollection(Collection):
         )
 
     def set_user_opinion_summary(self, conversation_id: str, user_summary: str) -> None:
-        """Set the overall feedback for the conversation.
+        """
+        Set the overall feedback for the conversation.
 
-        :param conversation_id: id of the conversation. Equal to the conversation id in the conversations collection.
-        :type conversation_id: str
-        :param overall_feedback: the overall feedback for the conversation.
-        :type overall_feedback: str
+        Args:
+            conversation_id (str): ID of the conversation. Equal to the conversation id in the conversations collection.
+            overall_feedback (str): The overall feedback for the conversation.
+
+        Returns:
+            None
         """
         self._collection.update_one(
             {"_id": ObjectId(conversation_id)},
@@ -601,22 +621,31 @@ class CollectionDispatcher:
         """
         Initialize a CollectionDispatcher object.
 
-        :param collection_names: list of collection names
-        :type collection_names: List[str]
-        :param db: the database object
-        :type db: any
+        Args:
+            collection_names (List[str]): List of collection names.
+            db (any): The database object.
+
+        Raises:
+            KeyError: If the collection name is not found in the database.
+
+        Returns:
+            None
         """
         self._connection_names = collection_names
         self._db = db
 
     def get_collection(self, collection_name: str):
-        """Return the collection object for the given collection name.
+        """
+        Return the collection object for the given collection name.
 
-        :param collection_name: name of the collection to be returned
-        :type collection_name: str
-        :raises KeyError: if the collection name is not found in the database
-        :return: the collection object
-        :rtype: Collection
+        Args:
+            collection_name (str): Name of the collection to be returned.
+
+        Raises:
+            KeyError: If the collection name is not found in the database.
+
+        Returns:
+            Collection: The collection object.
         """
         if collection_name not in self._connection_names:
             raise KeyError(f"Collection {collection_name} not found in the database.")
