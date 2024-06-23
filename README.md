@@ -137,7 +137,7 @@ TEACHme aims to address these challenges by providing accessible and cost-effect
 Teachers have the following functionalities:
 - Register/login to the platform
 - Create conversation rooms and invite students to join them.
-- Customize the register, topic, time limits of the activity, and level of difficulty of conversation agents to ensure they are tailored to the students needs.
+- Customize the register, topic, time limits of the activity, and level of difficulty of conversation agents to ensure they are tailored to the students' needs.
 - Track their students' activities and visualize the conversations they are engaging with on the platform.
 
 Students have the following functionalities:
@@ -167,14 +167,14 @@ NEXT_PUBLIC_SPEECH_REGION='westeurope'
 ## 	:toolbox: Getting Started
 
 ### :whale: Installation with Docker
-In order to install the project using `Docker`, you must have Docker and Docker Compose installed on your machine. You can find the installation instructions [here][docker-link]. Additionaly, you need to install `docker-compose` in order to run the project. You can find the installation instructions [here][docker-compose-link].
+To install the project using `Docker`, you must have Docker installed on your machine. You can find the installation instructions [here][docker-link]. Additionally, you need to install `docker-compose` to run the project. You can find the installation instructions [here][docker-compose-link].
 
 Once Docker and docker-compose are set up, follow the instructions in the wiki of the project to install the project using Docker.
 
 <!-- Prerequisites -->
 ### :bangbang: Prerequisites (no docker)
 This project runs on a Node.js environment. Make sure you have Node.js installed on your machine. You can install it from [here][node-link].
-Moreover it uses `npm` as package manager. The application is built using `Next.js`. If you don't have `npm` installed, you can install it from [here][npm-link]. If you don't have `Next.js` installed, you can follow the installation instructions [here][next-link].
+Moreover, it uses `npm` as package manager. The application is built using `Next.js`. If you don't have `npm` installed, you can install it from [here][npm-link]. If you don't have `Next.js` installed, you can follow the installation instructions [here][next-link].
 
 Regarding the backend, it is built using `Python 3`. You can install it from [here][python-link]. It uses `pip` packet manager. You can install it following the guide [here][pip-link].
 
