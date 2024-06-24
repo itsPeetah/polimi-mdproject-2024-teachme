@@ -13,8 +13,6 @@ COPY package.json package-lock.json ./
 # Install dependencies
 RUN npm install
 
-RUN npm i sharp
-
 # Debug step to check if node_modules contains Next.js
 RUN ls -la node_modules/next
 
