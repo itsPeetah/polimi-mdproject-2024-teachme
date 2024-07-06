@@ -101,12 +101,13 @@ function Conversations(data) {
                             <h1 className="font-display text-lg">
                                 Topic: {item['topic']}
                             </h1>
-                            <h2 className="font-display text-md">
+                            
+                            {/* <h2 className="font-display text-md">
                                 Difficuly: {item['difficulty']}
                             </h2>
                             <h2 className="font-display text-md">
                                 Level: {item['user_level']}
-                            </h2>
+                            </h2>  */}
                         </Link>
                     </li>
                 ))}
