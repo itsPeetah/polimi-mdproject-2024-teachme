@@ -72,7 +72,7 @@ export default function FeedbackPage() {
                 </p>
             )}
             {/* Conversation Info */}
-            {ConversationInfo(conversationInfo)}
+            {/*ConversationInfo(conversationInfo)*/}
             {/* Overall FeedBack */}
             {OverallFeedBack(overallFeedback)}
             {/* Details */}
