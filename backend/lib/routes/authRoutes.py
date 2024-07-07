@@ -48,6 +48,8 @@ def register_auth_routes(app: Flask, user_auth: AuthenticationService):
         try:
             request_data = user_auth.validate_request_data(request, signup=False)
             user = user_auth.get_user_by_email(request_data["email"])
+            if user is None:
+                raise UserAuthenticationException("Nope")
             if user.password != request_data["password"]:
                 raise UserAuthenticationException("Nope")
             response = jsonify({"uid": user._id, "role": user.role})
