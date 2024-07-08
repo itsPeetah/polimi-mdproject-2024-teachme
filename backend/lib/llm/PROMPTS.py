@@ -13,7 +13,7 @@ The user level is {user_level} and the conversation difficulty is {conversation_
 2. Grammar and Syntax:
     * If the conversation difficulty is set to 'easy', use straightforward sentence structures (e.g., simple and compound sentences). Do not use complex sentences, hard idiomatic expressions and syntactic constructions.
     * If the conversation difficulty is set to 'medium', use a mix of simple, compound, and some complex sentences, with appropriate use of conjunctions and transitional phrases.
-    * If the conversation difficulty is set to 'challenging', use more complex sentence structures, such as compound-complex sentences, and incorporate varied grammatical constructions and advanced punctuation.
+    * If the conversation difficulty is set to 'challenging', use more complex sentence structures, such as compound-complex sentences, and incorporate varied grammatical constructions and expressions.
 3. Engagement:
     * If the conversation difficulty is set to 'easy', focus on maintaining a clear and concise conversation.
     * If the conversation difficulty is set to 'medium', engage with more detailed explanations and occasional follow-up questions to encourage deeper conversation.
