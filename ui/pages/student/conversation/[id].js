@@ -11,7 +11,6 @@ import "animate.css";
 // Components
 import Mimi from "@/components/Mimi";
 import Timer from "@/components/Timer";
-import SpeechRecognition from "react-speech-recognition";
 import useSpeechToText from "@/hooks/useSpeechToText";
 
 const LISTEN_START_OPTIONS = {
@@ -42,27 +41,23 @@ export default function ConversationPage() {
   const [isEnd, setIsEnd] = useState(false);
   const [duration, setDuration] = useState();
 
-  const [waitingAgentResponse, setWaitingAgentResponse] = useState(false);
-
-  // Voice Input
   const {
-    // react-speech-recognition
-    finalTranscript,
     listening,
-    resetTranscript,
-    browserSupportsSpeechRecognition,
-  } = useSpeechToText({
-    stopWaitDurationMs: 2000, // for now I'll just set this to 2 seconds for everyone
-    onStoppedSpeaking: handleUserStoppedTalking,
-  });
+    speechRecognitionAvailable,
+    transcript,
+    startListening,
+    stopListening,
+    pauseRecognition,
+  } = useSpeechToText(2500, handleUserStoppedTalking);
 
   //* Effects
   // Check Browser Support for Speech Recognition
   useEffect(() => {
-    if (!browserSupportsSpeechRecognition) {
+    if (!speechRecognitionAvailable) {
       console.log("Browser doesnt support speech recognition.");
+      console.log("Might also be that you don't have a mic :)");
     }
-  }, [browserSupportsSpeechRecognition]);
+  }, [speechRecognitionAvailable]);
 
   // Get Conversation ID from URL
   useEffect(() => {
@@ -74,8 +69,7 @@ export default function ConversationPage() {
   // Start Listening
   useEffect(() => {
     if (!isPlaying && !isEnd) {
-      resetTranscript();
-      SpeechRecognition.startListening(LISTEN_START_OPTIONS);
+      startListening();
     }
   }, [isEnd, isPlaying]);
 
@@ -166,7 +160,6 @@ export default function ConversationPage() {
     console.log("Transcript:", userTranscript);
 
     async function handleTranscript() {
-      setWaitingAgentResponse(() => true);
       // Send POST req
       const res = await fetch(url3, {
         method: "POST",
@@ -174,7 +167,7 @@ export default function ConversationPage() {
         body: JSON.stringify({
           conversation_id: id,
           sender_id: userID,
-          message: finalTranscript,
+          message: userTranscript,
         }),
       });
       if (res.ok) {
@@ -183,15 +176,11 @@ export default function ConversationPage() {
         // Activate Mimi
         activateMimi(data["response"], userLevel);
         console.log("Mimi activated.");
-        // Reset transcript
-        resetTranscript();
       } else {
         console.log("Error sending conversation.");
       }
-      setWaitingAgentResponse(() => false);
     }
 
-    SpeechRecognition.abortListening();
     handleTranscript();
   }
 
@@ -237,7 +226,6 @@ export default function ConversationPage() {
       <div className="mt-4">
         <p>Listening: {listening.toString()}</p>
         <p>Playing: {isPlaying.toString()}</p>
-        <p>Waiting: {waitingAgentResponse.toString()}</p>
         <Mimi ref={mimiRef} onPlayAudio={handleAudioPlay} />
       </div>
       {/* Start Button */}
@@ -245,13 +233,17 @@ export default function ConversationPage() {
       {/* Mic Listening Indicator */}
       {isStart && (
         <Listening
-          listening={listening && !isPlaying && !waitingAgentResponse} // Spaghetti as shit!!!!!
+          listening={listening}
           lottieRef={lottieRef}
           isPlaying={isPlaying}
         />
       )}
       {/* Toolbar */}
-      {isStart && !isEnd && <Toolbar />}
+      {isStart && !isEnd && (
+        <Toolbar
+          functions={{ startListening, stopListening, pauseRecognition }}
+        />
+      )}
       {/* End Button */}
       {isEnd && (
         <button className="orange-btn" onClick={endConversation}>
@@ -293,21 +285,23 @@ function Toolbar({ functions, ...props }) {
       {/* play button */}
       <button
         onClick={() => {
-          SpeechRecognition.startListening(LISTEN_START_OPTIONS);
+          functions.startListening();
           window?.dispatchEvent(new Event("timer.resume"));
         }}
       >
         <FiPlay size={26} />
       </button>
       {/* pause button */}
-      <button onClick={() => {
-        SpeechRecognition.abortListening();
-        window?.dispatchEvent(new Event("timer.pause"));
-        }}>
+      <button
+        onClick={() => {
+          functions.pauseRecognition();
+          window?.dispatchEvent(new Event("timer.pause"));
+        }}
+      >
         <FiPause size={26} />
       </button>
       {/* stop listening button */}
-      <button onClick={() => SpeechRecognition.stopListening()}>
+      <button onClick={() => functions.stopListening()}>
         <FiStopCircle size={26} />
       </button>
       {/* exit button */}

@@ -1,64 +1,79 @@
-/**
- *  Taken from the previous tests and ported from ts to js (just had to comment out the type defs/decls)
- *  https://github.com/itsPeetah/polimi-mdproject-2024-teachme/blob/4a84f314050ba95d7e09fb4c666d151fa57e6d18/frontend/src/components/test/ChatAppTest.tsx
- */
-
 import { useEffect, useState } from "react";
-import { useSpeechRecognition } from "react-speech-recognition";
+import SpeechRecognition, {
+  useSpeechRecognition,
+} from "react-speech-recognition";
 
-// type UseSpeechToTextOption = {
-//   stopWaitDurationMs: number;
-//   onStoppedSpeaking?: (transcript: string) => void;
-// };
-
-export default function useSpeechToText(options /*: UseSpeechToTextOption*/) {
-  const { stopWaitDurationMs, onStoppedSpeaking } = options;
-  const [lastChangeTs, setLastChangeTs] = useState(Date.now());
-  const [isSpeaking, setIsSpeaking] = useState(false);
-
+export default function useSpeechToText(stopWaitDurationMs, onStoppedSpeaking) {
   const {
+    listening,
     transcript,
     interimTranscript,
-    finalTranscript,
-    listening,
     resetTranscript,
     browserSupportsSpeechRecognition,
     isMicrophoneAvailable,
   } = useSpeechRecognition();
 
+  const [lastUpdateTs, setLastUpdateTS] = useState(0);
+  const [timeoutId, setTimeoutId] = useState(null);
+  const [pauseRequested, setPauseRequested] = useState(false);
+
+  const speechRecognitionAvailable =
+    browserSupportsSpeechRecognition && isMicrophoneAvailable;
+
+  function startListening() {
+    setPauseRequested(false);
+    return SpeechRecognition.startListening({
+      continuous: true,
+      interimResults: true,
+    });
+  }
+
+  function stopListening() {
+    return SpeechRecognition.stopListening();
+  }
+
+  function pauseRecognition() {
+    setPauseRequested(true);
+    if (timeoutId !== null) clearTimeout(timeoutId);
+    setTimeoutId(null);
+    stopListening().finally(() => {
+      resetTranscript();
+    });
+  }
+
   useEffect(() => {
     if (!listening) return;
 
-    const now = Date.now();
-    if (!isSpeaking) setIsSpeaking(() => true);
+    function onTimeout() {
+      console.log("[STT] Timeout");
+      const now = Date.now();
+      const diff = now - lastUpdateTs;
+      if (diff >= stopWaitDurationMs) {
+        console.log("[STT] User stopped talking");
+        stopListening().finally(() => {
+          console.log("[STT] Stopped listening");
+          onStoppedSpeaking(transcript);
+          resetTranscript();
+        });
+      }
+    }
 
-    // Update last change and launch timeout
-    setLastChangeTs(() => now);
-    const timeoutId = setTimeout(() => {
-      console.log("User stopped talking");
-      setIsSpeaking(() => false);
-      const text = transcript;
-      resetTranscript();
-      onStoppedSpeaking?.(text);
-    }, stopWaitDurationMs);
+    if (!pauseRequested) {
+      const tid = setTimeout(onTimeout, stopWaitDurationMs);
+      if (timeoutId !== null) clearTimeout(timeoutId);
+      setTimeoutId(tid);
+    } else setPauseRequested(() => false);
 
-    // Cleanup function to clear timeout on transcript change
-    return () => clearTimeout(timeoutId);
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    setLastUpdateTS(() => Date.now());
+    console.log("Updated timestamp");
   }, [interimTranscript]);
 
   return {
-    // Speech recognition defaults
-    transcript,
-    interimTranscript,
-    finalTranscript,
     listening,
-    resetTranscript,
-    browserSupportsSpeechRecognition,
-    isMicrophoneAvailable,
-    // Hook customs
-    lastChangeTs,
-    isSpeaking,
+    speechRecognitionAvailable,
+    transcript,
+    startListening,
+    stopListening,
+    pauseRecognition,
   };
 }
