@@ -12,6 +12,7 @@ import "animate.css";
 import Mimi from "@/components/Mimi";
 import Timer from "@/components/Timer";
 import useSpeechToText from "@/hooks/useSpeechToText";
+import { pauseTimer_global, startTimer_global } from "@/hooks/useTimer";
 
 const LISTEN_START_OPTIONS = {
   language: "en-US",
@@ -224,8 +225,6 @@ export default function ConversationPage() {
       )}
       {/* MIMI */}
       <div className="mt-4">
-        <p>Listening: {listening.toString()}</p>
-        <p>Playing: {isPlaying.toString()}</p>
         <Mimi ref={mimiRef} onPlayAudio={handleAudioPlay} />
       </div>
       {/* Start Button */}
@@ -240,9 +239,12 @@ export default function ConversationPage() {
       )}
       {/* Toolbar */}
       {isStart && !isEnd && (
-        <Toolbar
-          functions={{ startListening, stopListening, pauseRecognition }}
-        />
+        <>
+          <h1>please wait for mimi to be done talking before pausing {":)"}</h1>
+          <Toolbar
+            functions={{ startListening, stopListening, pauseRecognition }}
+          />
+        </>
       )}
       {/* End Button */}
       {isEnd && (
@@ -286,7 +288,7 @@ function Toolbar({ functions, ...props }) {
       <button
         onClick={() => {
           functions.startListening();
-          window?.dispatchEvent(new Event("timer.resume"));
+          startTimer_global();
         }}
       >
         <FiPlay size={26} />
@@ -295,7 +297,7 @@ function Toolbar({ functions, ...props }) {
       <button
         onClick={() => {
           functions.pauseRecognition();
-          window?.dispatchEvent(new Event("timer.pause"));
+          pauseTimer_global();
         }}
       >
         <FiPause size={26} />

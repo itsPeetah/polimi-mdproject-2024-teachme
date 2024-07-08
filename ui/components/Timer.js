@@ -1,17 +1,8 @@
+import useTimer, { startTimer_global } from "@/hooks/useTimer";
 import { useEffect } from "react";
-import { useTimer } from "react-timer-hook";
 
 export default function Timer(props) {
-  const time = new Date();
-  time.setSeconds(time.getSeconds() + 60 * props.duration);
-  const { seconds, minutes, isRunning, start, pause, resume } = useTimer({
-    expiryTimestamp: time,
-    autoStart: false,
-    onExpire: () => {
-      console.log("Timer Expired");
-      props.timerEnd();
-    },
-  });
+  const { seconds, minutes, isDone } = useTimer(60 * props.duration);
 
   function formatSeconds(seconds) {
     return seconds < 10 ? "0" + seconds.toString() : seconds.toString();
@@ -19,29 +10,9 @@ export default function Timer(props) {
 
   useEffect(() => {
     if (props.isStart) {
-      start();
+      startTimer_global();
     }
-  }, [props.isStart, start]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    function onPause() {
-      pause();
-    }
-
-    function onResume() {
-      resume();
-    }
-
-    window.addEventListener("timer.pause", onPause);
-    window.addEventListener("timer.resume", onResume);
-
-    return () => {
-      window.removeEventListener("timer.pause", onPause);
-      window.removeEventListener("timer.resume", onResume);
-    };
-  }, []);
+  }, [props.isStart]);
 
   return (
     <div className="w-24 p-2 font-display text-lime-400 text-xl text-center border-2 border-lime-400 rounded-lg absolute top-6 right-10">
