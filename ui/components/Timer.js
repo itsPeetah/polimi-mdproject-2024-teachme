@@ -23,6 +23,26 @@ export default function Timer(props) {
     }
   }, [props.isStart, start]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    function onPause() {
+      pause();
+    }
+
+    function onResume() {
+      resume();
+    }
+
+    window.addEventListener("timer.pause", onPause);
+    window.addEventListener("timer.resume", onResume);
+
+    return () => {
+      window.removeEventListener("timer.pause", onPause);
+      window.removeEventListener("timer.resume", onResume);
+    };
+  }, []);
+
   return (
     <div className="w-24 p-2 font-display text-lime-400 text-xl text-center border-2 border-lime-400 rounded-lg absolute top-6 right-10">
       {minutes}:{formatSeconds(seconds)}

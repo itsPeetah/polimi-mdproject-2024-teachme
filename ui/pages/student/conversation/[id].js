@@ -294,12 +294,16 @@ function Toolbar({ functions, ...props }) {
       <button
         onClick={() => {
           SpeechRecognition.startListening(LISTEN_START_OPTIONS);
+          window?.dispatchEvent(new Event("timer.resume"));
         }}
       >
         <FiPlay size={26} />
       </button>
       {/* pause button */}
-      <button onClick={() => SpeechRecognition.abortListening()}>
+      <button onClick={() => {
+        SpeechRecognition.abortListening();
+        window?.dispatchEvent(new Event("timer.pause"));
+        }}>
         <FiPause size={26} />
       </button>
       {/* stop listening button */}
