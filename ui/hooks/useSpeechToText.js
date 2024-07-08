@@ -25,6 +25,7 @@ export default function useSpeechToText(stopWaitDurationMs, onStoppedSpeaking) {
     return SpeechRecognition.startListening({
       continuous: true,
       interimResults: true,
+      language: "en-US",
     });
   }
 
