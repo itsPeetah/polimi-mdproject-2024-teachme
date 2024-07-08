@@ -15,7 +15,8 @@ import SpeechRecognition from "react-speech-recognition";
 import useSpeechToText from "@/hooks/useSpeechToText";
 
 const LISTEN_START_OPTIONS = {
-  continuous: true,
+  language: "en-US",
+  // continuous: true,
   interimResults: true,
 };
 
@@ -152,7 +153,12 @@ export default function ConversationPage() {
   function handleUserStoppedTalking(userTranscript /* string */) {
     console.log("Handling user transcript");
 
-    if (isError || !userTranscript || userTranscript.length < 1) {
+    if (isError || isEnd) {
+      console.log("There's a time and place for everything but not now...");
+      return;
+    }
+
+    if (!userTranscript || userTranscript.length < 1) {
       console.log("No transcript?", userTranscript);
       return;
     }
