@@ -2,7 +2,7 @@ import useTimer, { startTimer_global } from "@/hooks/useTimer";
 import { useEffect } from "react";
 
 export default function Timer(props) {
-  const { seconds, minutes, isDone } = useTimer(60 * props.duration);
+  const { seconds, minutes, isDone } = useTimer(60 * props.duration, props.timerEnd);
 
   function formatSeconds(seconds) {
     return seconds < 10 ? "0" + seconds.toString() : seconds.toString();
