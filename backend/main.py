@@ -34,7 +34,7 @@ register_conversation_routes(app, db, chatbot_manager, logger)
 
 if __name__ == "__main__":
     chatbot_manager.start_heartbeat()
-    system("python3 -m flask --app main run --debug --host 0.0.0.0 --port 5000")
+    system("python3 -m flask --app main run --debug")
 
     # from lib.llm import test_chatbot
     # test_chatbot(

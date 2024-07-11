@@ -3,7 +3,6 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 import Head from "next/head";
 // APIs
-
 import useSWR from "swr";
 import { getCookie } from "cookies-next";
 import { FiPlay, FiPause, FiStopCircle, FiLogOut } from "react-icons/fi";
@@ -241,7 +240,6 @@ export default function ConversationPage() {
       {/* Toolbar */}
       {isStart && !isEnd && (
         <>
-          <h1>please wait for mimi to be done talking before pausing {":)"}</h1>
           <Toolbar
             functions={{ startListening, stopListening, pauseRecognition }}
           />
