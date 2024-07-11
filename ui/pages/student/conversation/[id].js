@@ -11,8 +11,9 @@ import "animate.css";
 // Components
 import Mimi from "@/components/Mimi";
 import Timer from "@/components/Timer";
-import useSpeechToText from "@/hooks/useSpeechToText";
-import { pauseTimer_global, startTimer_global } from "@/hooks/useTimer";
+import useSpeechToText from "@/lib/useSpeechToText";
+import { pauseTimer_global, startTimer_global } from "@/lib/useTimer";
+import { BACKEND_URL_BASE } from "@/lib/constants";
 
 const LISTEN_START_OPTIONS = {
   language: "en-US",
@@ -108,7 +109,7 @@ export default function ConversationPage() {
 
   //* REST APIs
   // Get Conversation Info
-  const url = "http://127.0.0.1:5000/get-conversation-info/" + id;
+  const url = `${BACKEND_URL_BASE}/get-conversation-info/${id}`;
   const { data, error } = useSWR(id ? url : null, fetcher);
   useEffect(() => {
     if (data) {
@@ -122,7 +123,7 @@ export default function ConversationPage() {
   }, [data, error]);
 
   // Initialize Conversation
-  const url2 = "http://127.0.0.1:5000/initialize-conversation";
+  const url2 = `${BACKEND_URL_BASE}/initialize-conversation`;
   useEffect(() => {
     async function init() {
       const initRes = await fetch(url2, {
@@ -144,7 +145,7 @@ export default function ConversationPage() {
   }, [id]);
 
   // Conversation Handler
-  const url3 = "http://127.0.0.1:5000/user-chat-message";
+  const url3 = `${BACKEND_URL_BASE}/user-chat-message`;
   function handleUserStoppedTalking(userTranscript /* string */) {
     console.log("Handling user transcript");
 
@@ -187,7 +188,7 @@ export default function ConversationPage() {
 
   // End Conversation
   const endConversation = () => {
-    const url4 = "http://127.0.0.1:5000/end-conversation/" + id;
+    const url4 = `${BACKEND_URL_BASE}/end-conversation/${id}`;
     fetch(url4)
       .then((res) => {
         if (res.ok) {

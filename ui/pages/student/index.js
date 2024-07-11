@@ -10,6 +10,7 @@ import { DNA } from "react-loader-spinner";
 import { SideMenu } from "@/components/SideMenu";
 import { SideMenuBtn } from "@/components/SideMenuBtn";
 import Head from "next/head";
+import { BACKEND_URL_BASE } from "@/lib/constants";
 
 export default function StudentPage() {
   // Constants
@@ -23,7 +24,7 @@ export default function StudentPage() {
   const [feedbacks, setFeedbacks] = useState([]);
 
   // Fetch user info
-  const url = "http://127.0.0.1:5000/get-username/" + getCookie("email");
+  const url = `${BACKEND_URL_BASE}/get-username/${getCookie("email")}`;
   const { data: infoData, error: infoError } = useSWR(url, fetcher);
   useEffect(() => {
     if (infoData) {
@@ -34,8 +35,9 @@ export default function StudentPage() {
   }, [infoData, infoError]);
 
   // Fetch List of user conversations
-  const url2 =
-    "http://127.0.0.1:5000/list-user-conversations/" + getCookie("email");
+  const url2 = `${BACKEND_URL_BASE}/list-user-conversations/${getCookie(
+    "email"
+  )}`;
   const { data, error } = useSWR(url2, fetcher);
   useEffect(() => {
     if (data) {

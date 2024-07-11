@@ -1,4 +1,4 @@
-import useTimer, { startTimer_global } from "@/hooks/useTimer";
+import useTimer, { startTimer_global } from "@/lib/useTimer";
 import { useEffect } from "react";
 
 export default function Timer(props) {
