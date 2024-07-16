@@ -38,11 +38,11 @@ body {
 
   /* Cards */
   .conversation-card {
-    @apply flex flex-col items-center justify-center gap-4 w-60 h-52 nm-concave-fuchsia-800 hover:nm-convex-fuchsia-800 hover:scale-105 transition-all duration-200 ease-linear rounded-2xl;
+    @apply flex flex-col items-center justify-center text-center gap-4 w-60 h-52 nm-concave-fuchsia-800 hover:nm-convex-fuchsia-800 hover:scale-105 transition-all duration-200 ease-linear rounded-2xl;
   }
 
   .feedback-card {
-    @apply flex flex-col items-center justify-center gap-4 w-60 h-52 nm-concave-indigo-700 hover:nm-convex-indigo-700 hover:scale-105 transition-all duration-200 ease-linear rounded-2xl;
+    @apply flex flex-col items-center justify-center text-center gap-4 w-60 h-52 nm-concave-indigo-700 hover:nm-convex-indigo-700 hover:scale-105 transition-all duration-200 ease-linear rounded-2xl;
   }
 
   .student-card {

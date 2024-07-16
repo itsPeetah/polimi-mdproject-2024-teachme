@@ -37,7 +37,7 @@ export default function CreatePage() {
           user_level: data.userLevel,
           difficulty: data.difficulty,
           topic: data.topic,
-          teacher_email: "t@t.com",
+          teacher_email: getCookie('email'),
           student_email: data.studentEmail,
           time_limit: data.duration,
         }),
