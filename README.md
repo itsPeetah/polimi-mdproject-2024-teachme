@@ -261,7 +261,7 @@ All the animated icons used in this repository are provided by <a href="https://
 [running-logo]: ./assets/run_icon.gif
 [running-link]: https://github.com/itsPeetah/polimi-mdproject-2024-teachme/wiki/Running
 [report-logo]: ./assets/report_logo.gif
-[report-link]: https://www.google.com/
+[report-link]: https://github.com/itsPeetah/polimi-mdproject-2024-teachme/tree/main/docs
 [wiki-logo]: ./assets/wiki_logo.gif
 [wiki-link]: https://github.com/itsPeetah/polimi-mdproject-2024-teachme/wiki/
 [code-logo]: ./assets/code_logo.gif
