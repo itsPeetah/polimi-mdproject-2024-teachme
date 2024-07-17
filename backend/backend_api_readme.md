@@ -424,3 +424,17 @@ Overall, your participation in the conversation was positive. By incorporating m
 > In the case above, the content of the feedback and of the messages are not correlated since the feedback string has been placed only for demonstration purposes. With a true conversation the overall feedback reflects both the content and the structure of the conversation it refers to.
 
 **Error handling:** Returns error 400 if the specified conversation was not found in the database, i.e., if an error occured.
+
+## Activate roles reversed challenge
+
+**Route:** `/create-conversation-roles-reversed`  
+**Methods:** `POST`  
+**Description:** Creates, starting from the (ended) conversation with the specified id, a new conversation with the roles reversed challenge activated. Note that a conversation with the roles reversed challenge activated is exactly the same as a normal conversation, but with a slightly modified system prompt for the chatbot. Frontend side, there should not be any difference between a normal conversation and a conversation with the roles reversed challenge activated.
+
+**Query parameters:**
+
+- **conversation_id (required, string):** id of the conversation from which to create the new conversation with the roles reversed challenge activated.
+
+**Response:** The function returns a JSON containing the new conversation ID if the creation is successful.
+
+**Error handling:** Returns error 400 if the specified conversation was not found in the database, i.e., if an error occured.
