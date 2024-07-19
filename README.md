@@ -162,6 +162,7 @@ For running the frontend you will need to add the following environment variable
 ```env
 NEXT_PUBLIC_SPEECH_KEY=<YOUR AZURE TTS API KEY>
 NEXT_PUBLIC_SPEECH_REGION='westeurope'
+NEXT_PUBLIC_BACKEND_URL_BASE=<URL FOR THE BACKEND>
 ```
 <!-- Getting Started -->
 ## 	:toolbox: Getting Started
@@ -215,8 +216,8 @@ The deployment of the project is not yet available.
 |   Viseme for facial position  | The artificial agent must look like an avatar and make reasonable mouth movements while talking according to visemes  |   ✅   |
 |   Post-conversation feedback  | Once a conversation has ended, the platform must provide feedback to students regarding the conversation itself       |   ✅   |
 |  Post-conversation challenges | The platform must provide additional challenges (synonyms, pronunciation, ...) to students once the conversation ends |   ✅   |
-|          Pilot-test           | Test the system and its functionalities with external people                                                          |   ❌   |
-|          Final report         | Write the final report of the project                                                                                 |   ❌   |
+|          Pilot-test           | Test the system and its functionalities with external people                                                          |   ✅   |
+|          Final report         | Write the final report of the project                                                                                 |   ✅   |
 |         Deployment           | Deploy the platform on a cloud service                                                                                 |   ❌   |
 > **_KEY:_** [✅]() Done [❌]() Not done yet
 
